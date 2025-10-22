@@ -1,0 +1,4 @@
+{
+    "kick-assembler-vscode-ext.KickAssembler.kickAssJarPath": "/home/honza/projects/c64/pc-tools/kickass/KickAss.jar",
+    "kick-assembler-vscode-ext.VICE.emulatorPath": "x64sc"
+}

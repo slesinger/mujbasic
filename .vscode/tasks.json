@@ -1,0 +1,72 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build MujBASIC",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar ${file} -o ${fileBasenameNoExtension}.bin -vicesymbols && mv ${fileBasenameNoExtension}.bin ${fileBasenameNoExtension}.sym ${fileBasenameNoExtension}.vs build/"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "owner": "kickassembler",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(error|warning):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build and Run in VICE",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar ${file} -o ${fileBasenameNoExtension}.bin -vicesymbols && mv ${fileBasenameNoExtension}.bin ${fileBasenameNoExtension}.sym ${fileBasenameNoExtension}.vs build/ && x64sc -basic ${fileDirname}/build/${fileBasenameNoExtension}.bin -reu -reusize 2048"
+            ],
+            "group": "test",
+            "problemMatcher": {
+                "owner": "kickassembler",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(error|warning):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "dependsOn": ["Build MujBASIC"]
+        },
+        {
+            "label": "Clean Build",
+            "type": "shell",
+            "command": "rm",
+            "args": [
+                "-rf",
+                "${workspaceFolder}/build"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        }
+    ]
+}

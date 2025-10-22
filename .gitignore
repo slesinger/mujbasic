@@ -1,0 +1,7 @@
+build/
+*.prg
+*.crt
+*.vs
+*.sym
+*.dbg
+.source.txt
