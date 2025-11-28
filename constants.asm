@@ -5,6 +5,8 @@
 // This file contains all shared constants for the project.
 // ============================================================================
 
+
+
 // KERNAL routines
 .const GETIN        = $FFE4     // KERNAL get character from keyboard
 .const CHROUT       = $FFD2     // KERNAL character output

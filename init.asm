@@ -31,8 +31,8 @@ InitSystem:
 // ============================================================================
 InitInputBuffer:
     lda #0
-    sta $033C           // Clear InputLength
-    sta $033D           // Clear CursorPos
+    sta InputLength     // Clear InputLength
+    sta CursorPos       // Clear CursorPos
     sta $CC             // Enable cursor (0 = enabled, 1+ = disabled)
     rts
 

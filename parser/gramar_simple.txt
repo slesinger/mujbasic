@@ -1,0 +1,65 @@
+; BNF Grammar Specification for SMON, Standard Mode, Disk Monitor, and DOS Commands
+
+; Whitespace Handling:
+;   - Any sequence of one or more spaces (whitespace) is treated as a single delimiter.
+;   - Whitespace is used to separate commands and arguments.
+;   - Leading and trailing whitespace around tokens is ignored.
+;   - Whitespace inside quoted strings (e.g., filenames) is preserved.
+;   - Use <ws> to represent required whitespace between tokens where needed.
+
+
+<start_address> ::= <address>
+<end_address> ::= <address>
+<target_address> ::= <address>
+<address> ::= <hex_digit> <hex_digit> <hex_digit> <hex_digit>
+<file_char> ::= "A" | ... | "Z" | "a" | ... | "z" | "0" | ... | "9" | "." | "- "
+<file_path> ::= [ "/" ] <file_char> { <file_char> | "/" }
+<filename> ::= <file_char> { <file_char> }
+<directory_path> ::= [ <drive_number> ":" ] <file_path>
+<absolute_filepath> ::= <directory_path> "/" <filename>
+<quoted_file_char> ::= any character except '"' | "/"
+<quoted_file_path> ::= '"' [ "/" ] <quoted_file_char> { <quoted_file_char> | "/" } '"'
+<quoted_filename> ::= '"' <quoted_file_char> { <quoted_file_char> } '"'
+<quoted_directory_path> ::= [ <drive_number> ":" ] <quoted_file_path>
+<quoted_absolute_filepath> ::= '"' [ <drive_number> ":" ] [ "/" ] <quoted_file_char> { <quoted_file_char> | "/" } "/" <quoted_file_char> { <quoted_file_char> }'"'
+<file_or_path> ::= <filename>
+				  | <file_path>
+				  | <directory_path>
+				  | <absolute_filepath>
+				  | <quoted_filename>
+				  | <quoted_file_path>
+				  | <quoted_directory_path>
+				  | <quoted_absolute_filepath>
+
+<command> ::= <standard_mode_command>
+            | <dos_commands>
+		    | <h_command>
+
+
+<standard_mode_command> ::= <load_command>                 ; Load file from device
+
+; -----------------------------------------------------------------------------
+; Load Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Loads a file from the selected device into memory at the specified address (optional).
+; Usage:
+;   l "filename" [aaaa]
+;     - 'l' starts the load command.
+;     - 'filename' is the name of the file to load (in quotes).
+;     - 'aaaa' is the optional address to load the file into.
+; Notes:
+;   - If no address is given, the file is loaded to its default location.
+<load_command> ::= "l" <ws> <file_or_path> [ <ws> <address> ]  ; command code 81
+
+
+; DOS Commands (unchanged, for file management)
+<dos_commands> ::= <ls_command>
+			   | <ll_command>
+
+<ls_command> ::= "ls" [ <ws> ( <file_or_path> ) ]  ; command code 12
+<ll_command> ::= "ll" [ <ws> ( <file_or_path> ) ]  ; command code 25
+; Whitespace definition
+<ws> ::= ( " " )+
+
+<h_command> ::= "help"  ; help command  ; command code 129

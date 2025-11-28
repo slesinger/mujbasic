@@ -8,7 +8,7 @@
 // Constants
 
 #import "constants.asm"
-
+#import "input_dispatch.asm"
 // ============================================================================
 // Main Input Handler
 // ============================================================================
@@ -34,7 +34,7 @@ HandleInput:
     
     // Regular character - insert at cursor position
     ldx InputLength
-    cpx #255            // Max buffer size check
+    cpx #255          // Max buffer size check
     beq InputDone       // Buffer full, ignore
     
     // Save character temporarily
@@ -57,7 +57,7 @@ ShiftLoop:
     
 ShiftDone:
 InsertAtEnd:
-    // Insert character at cursor position
+    // Insert character at cursor position to input buffer
     pla
     ldx CursorPos
     sta InputBuffer,x
@@ -151,7 +151,10 @@ EmptyInput:
     lda #ENTER_KEY
     jsr CHROUT
 
-    // TODO: Process the input line here (e.g., execute command)
+
+    // Dispatch the input line as a command
+    jsr InputDispatch
+
     jsr PrintResponse
 
     rts

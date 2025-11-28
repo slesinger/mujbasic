@@ -1,6 +1,6 @@
 # MujBASIC - Custom BASIC ROM Replacement for Commodore 64
 
-A custom BASIC ROM replacement for the Commodore 64, written in 6502 assembly using KickAssembler.
+A custom BASIC ROM replacement for the Commodore 64, written in 6502 assembly using KickAssembler. This project assumes running on Commodore Ultimate or Commodore 64 with Ultimate Cartridge for networking capabilities.
 
 ## Project Overview
 
@@ -8,10 +8,18 @@ This project replaces the standard Commodore 64 BASIC ROM ($A000-$BFFF) with cus
 
 ### Current Version: 0.1 (Minimal Test)
 
-The first minimal version demonstrates ROM replacement by:
-- Initializing the C64 (clearing screen, setting colors)
-- Running an infinite loop that increments the value at memory location $0400 (first screen memory byte)
-- This creates a visible effect showing the ROM is executing
+Features:
+- Initialize (detects REU size, clears screen)
+- Expects user input like a terminal
+- Dispatch user input (see Syntax section)
+
+### Future Plans
+- Implement a simple plain text editor https://github.com/gillham/speedscript
+### Syntax
+
+The syntax for user commands is as follows:
+
+see parser directory
 
 ## Prerequisites
 
@@ -19,24 +27,11 @@ The first minimal version demonstrates ROM replacement by:
    - Download from: http://www.theweb.dk/KickAssembler/
    - Install Java Runtime Environment (JRE) if not already installed
 
-2. **VS Code Extension** - Already installed: `Kick Assembler 8-Bit Retro Studio`
+2. **VS Code Extension** - `Kick Assembler 8-Bit Retro Studio`
 
 3. **VICE Emulator** (optional, for testing)
    - Download from: https://vice-emu.sourceforge.io/
    - Recommended for testing the ROM
-
-## Project Structure
-
-```
-mujbasic/
-├── mujbasic.asm        # Main assembly source file
-├── build/              # Build output directory (created automatically)
-│   ├── mujbasic.prg    # Compiled program
-│   └── mujbasic.crt    # Cartridge image
-├── .vscode/
-│   └── tasks.json      # Build tasks configuration
-└── README.md           # This file
-```
 
 ## Building the Project
 

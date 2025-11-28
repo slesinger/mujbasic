@@ -30,12 +30,38 @@
             }
         },
         {
-            "label": "Build and Run in VICE",
+            "label": "Build and Run ROM in VICE",
             "type": "shell",
             "command": "bash",
             "args": [
                 "-c",
-                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/mujbasic/mujbasic.asm -o mujbasic.bin -vicesymbols && mv mujbasic.bin mujbasic.sym mujbasic.vs build/ && x64sc -basic build/mujbasic.bin -reu -reusize 2048"
+                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/mujbasic/mujbasic.asm -o mujbasic.bin -vicesymbols && mv mujbasic.bin mujbasic.sym mujbasic.vs build/ && x64sc -8 ../../sdcards/sidekick64/D64/hondani/meetro-side-a.d64 -basic build/mujbasic.bin -reu -reusize 2048"
+            ],
+            "group": "test",
+            "problemMatcher": {
+                "owner": "kickassembler",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(error|warning):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "dependsOn": ["Build MujBASIC"]
+        },
+        {
+            "label": "Build and Run PRG in VICE",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/mujbasic/mujbasic.asm -o mujbasic.bin -vicesymbols && mv mujbasic.bin mujbasic.sym mujbasic.vs build/ && x64sc -8 ../../sdcards/sidekick64/D64/hondani/meetro-side-a.d64 -basic /usr/local/share/vice/C64/basic-901226-01.bin -reu -reusize 2048 build/mujbasic.bin"
             ],
             "group": "test",
             "problemMatcher": {

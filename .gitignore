@@ -6,3 +6,5 @@ build/
 *.dbg
 .source.txt
 mujbasic.bin
+venv/
+msbasic/

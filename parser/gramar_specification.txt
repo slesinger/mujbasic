@@ -1,0 +1,434 @@
+
+
+
+; BNF Grammar Specification for SMON, Standard Mode, Disk Monitor, and DOS Commands
+
+; This grammar describes the commands supported by the SMON machine code monitor for the Commodore 64.
+; Each command is annotated with a description based on the SMON user manual.
+
+; A single hexadecimal digit (0-9, A-F, case-insensitive)
+<hex_digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "A" | "B" | "C" | "D" | "E" | "F" | "a" | "b" | "c" | "d" | "e" | "f"
+; 16-bit address (4 hex digits)
+<start_address> ::= <address>
+<end_address> ::= <address>
+<target_address> ::= <address>
+<address> ::= <hex_digit> <hex_digit> <hex_digit> <hex_digit>
+; 8-bit value (2 hex digits)
+<byte_value> ::= <hex_digit> <hex_digit>
+; Commodore device numbers for drives
+<drive_number> ::= "8" | "9" | "10" | "11" | "14"
+; Characters allowed in filenames
+<file_char> ::= "A" | ... | "Z" | "a" | ... | "z" | "0" | ... | "9" | "."
+<file_path> ::= <file_char> { <file_char> }
+<directory_path> ::= [ <drive_number> ":" ] <file_char> { <file_char> | "/" }
+
+
+; Top-level command: can be a SMON standard mode command, disk monitor command, DOS command, or help command
+<command> ::= <standard_mode_command>
+		   | <disk_monitor_command>
+		   | <dos_commands>
+		   | <h_command>
+
+
+; Standard Mode Commands (SMON)
+; These commands are available in the main SMON monitor mode.
+<standard_mode_command> ::= <assemble_command>            ; Assemble code at address
+						| <convert_program_command>      ; Move and adjust code in memory
+						| <disassemble_command>          ; Disassemble memory
+						| <find_bytes_command>           ; Find byte sequence in memory
+						| <find_abs_addr_command>        ; Find absolute address references
+						| <find_relative_command>        ; Find relative branch references
+						| <find_table_command>           ; Find tables (non-disassemblable data)
+						| <find_zeropage_command>        ; Find zero-page address references
+						| <find_immediate_command>       ; Find immediate operand usage
+						| <go_command>                   ; Execute code at address
+						| <inspect_command>              ; Inspect memory as ASCII
+						| <load_command>                 ; Load file from device
+						| <memory_dump_command>          ; Dump memory as hex/ASCII
+						| <occupy_command>               ; Fill memory with value
+						| <register_command>             ; Show/edit CPU registers
+						| <save_command>                 ; Save memory to file
+						| <move_addresses_command>       ; Adjust absolute addresses in code
+						| <write_command>                ; Copy memory block
+						| <check_equality_command>       ; Compare memory ranges
+						| <convert_decimal_command>      ; Convert decimal to hex/bin
+						| <convert_hex_command>          ; Convert hex to decimal/bin
+						| <convert_binary_command>       ; Convert binary to dec/hex
+
+; --- Standard Mode Command Definitions ---
+
+; -----------------------------------------------------------------------------
+; Assemble Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Enters assembler mode at the specified address, allowing the user to enter
+;   6502 assembly instructions, data bytes, or symbolic markers. Assembly input
+;   continues until the user enters 'F' to finish.
+; Usage:
+;   Aaaaa [assemble_data ...] F
+;     - 'A' starts assembler mode at address 'aaaa' (4 hex digits).
+;     - 'assemble_data' can be:
+;         - Marker: 'Mxx' (where xx is a hex byte, used for symbolic labels)
+;         - Data byte: '.yy' (where yy is a hex byte, inserts a byte)
+;         - Opcode: any valid 6502 instruction (e.g., LDA, STA, JMP, etc.)
+;     - 'F' finishes assembly input and returns to command mode.
+; Notes:
+;   - The assembler supports symbolic markers for easier code navigation.
+;   - Data bytes can be inserted directly using the dot notation.
+;   - All input is case-insensitive.
+;   - If an error is detected in the input, an error message is displayed and
+;     the user can re-enter the line.
+; Example:
+;   A1000 LDA #$01 STA $D020 F
+;     Assembles code at $1000 to load 1 into the accumulator and store it in
+;     the border color register.
+<assemble_command> ::= "A" <address> { <assemble_data> } "F"
+<assemble_data> ::= <marker> | <dot_byte> | <opcode>
+<marker> ::= "M" <hex_digit> <hex_digit>        ; Marker for symbolic label
+<dot_byte> ::= "." <byte_value>                 ; Insert single data byte
+<opcode> ::= ... ; (opcodes as per 6502)
+
+; -----------------------------------------------------------------------------
+; Convert Program Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Moves a block of memory and adjusts all absolute address references within
+;   the block to match the new location. Useful for relocating code or data.
+; Usage:
+;   Caaaaeeee tttt ssss dddd
+;     - 'C' starts the convert program command.
+;     - 'aaaa' is the start address of the block to move.
+;     - 'eeee' is the end address of the block to move.
+;     - 'tttt' is the target address where the block will be moved.
+;     - 'ssss' and 'dddd' are additional parameters for address adjustment (see manual for details).
+; Notes:
+;   - All absolute addresses within the block are updated to reflect the new location.
+;   - Use with caution to avoid overwriting important memory.
+<convert_program_command> ::= "C" <address> <end_address> <address> <address> <address>
+
+; -----------------------------------------------------------------------------
+; Disassemble Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Disassembles memory contents from a given start address to an optional end address,
+;   displaying the corresponding 6502 assembly instructions.
+; Usage:
+;   Daaaa [eeee]
+;     - 'D' starts the disassemble command.
+;     - 'aaaa' is the start address.
+;     - 'eeee' is the optional end address. If omitted, a default range is used.
+; Notes:
+;   - The output shows both the opcode bytes and the assembly mnemonics.
+;   - Useful for analyzing machine code in memory.
+<disassemble_command> ::= "D" <address> [ <end_address> ]
+
+; -----------------------------------------------------------------------------
+; Find Bytes Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Searches a memory range for a specific sequence of bytes, with optional wildcards.
+; Usage:
+;   Fxx[xx|*]... , aaaa eeee
+;     - 'F' starts the find bytes command.
+;     - 'xx' is a byte value (2 hex digits), '*' is a wildcard (matches any byte).
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+; Notes:
+;   - The search pattern can include any number of bytes and wildcards.
+;   - All matching locations are listed.
+<find_bytes_command> ::= "F" <byte_value> { <byte_value> | "*" } "," <address> <end_address>
+
+; -----------------------------------------------------------------------------
+; Find Absolute Address Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Finds all references to a specific absolute address within a memory range.
+; Usage:
+;   FAaaaa, ssss eeee
+;     - 'FA' starts the find absolute address command.
+;     - 'aaaa' is the address to search for.
+;     - 'ssss' is the start address, 'eeee' is the end address of the search range.
+; Notes:
+;   - Useful for tracking code/data references.
+<find_abs_addr_command> ::= "FA" <address> "," <address> <end_address>
+
+; -----------------------------------------------------------------------------
+; Find Relative Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Finds all relative branch instructions that target a specific address within a range.
+; Usage:
+;   FRaaaa, ssss eeee
+;     - 'FR' starts the find relative command.
+;     - 'aaaa' is the target address.
+;     - 'ssss' is the start address, 'eeee' is the end address of the search range.
+; Notes:
+;   - Helps locate conditional and unconditional branches.
+<find_relative_command> ::= "FR" <address> "," <address> <end_address>
+
+; -----------------------------------------------------------------------------
+; Find Table Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Searches for tables (non-disassemblable data) in a memory range.
+; Usage:
+;   FTaaaa eeee
+;     - 'FT' starts the find table command.
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+; Notes:
+;   - Useful for identifying data blocks that are not code.
+<find_table_command> ::= "FT" <address> <end_address>
+
+; -----------------------------------------------------------------------------
+; Find Zero-Page Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Finds all references to a specific zero-page address in a memory range.
+; Usage:
+;   FZxx, aaaa eeee
+;     - 'FZ' starts the find zero-page command.
+;     - 'xx' is the zero-page address (2 hex digits).
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+; Notes:
+;   - Zero-page addresses are used for fast access in 6502 code.
+<find_zeropage_command> ::= "FZ" <byte_value> "," <address> <end_address>
+
+; -----------------------------------------------------------------------------
+; Find Immediate Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Finds all instructions using a specific immediate operand in a memory range.
+; Usage:
+;   FIxx, aaaa eeee
+;     - 'FI' starts the find immediate command.
+;     - 'xx' is the immediate value (2 hex digits).
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+; Notes:
+;   - Immediate operands are values used directly in instructions (e.g., LDA #$01).
+<find_immediate_command> ::= "FI" <byte_value> "," <address> <end_address>
+
+; -----------------------------------------------------------------------------
+; Go Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Executes machine code at the specified address, or at the current program counter if no address is given.
+; Usage:
+;   G[aaaa]
+;     - 'G' starts execution.
+;     - 'aaaa' is the optional address to start execution from.
+; Notes:
+;   - Use with caution, as this will transfer control to machine code.
+<go_command> ::= "G" [ <address> ]
+
+; -----------------------------------------------------------------------------
+; Inspect Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Displays memory as ASCII characters, allowing the user to inspect and edit memory contents.
+; Usage:
+;   Kaaaa [eeee]
+;     - 'K' starts the inspect command.
+;     - 'aaaa' is the start address.
+;     - 'eeee' is the optional end address.
+; Notes:
+;   - ASCII and hex representations are shown side by side.
+<inspect_command> ::= "K" <address> [ <end_address> ]
+
+; -----------------------------------------------------------------------------
+; Load Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Loads a file from the selected device into memory at the specified address (optional).
+; Usage:
+;   L"filename" [aaaa]
+;     - 'L' starts the load command.
+;     - 'filename' is the name of the file to load (in quotes).
+;     - 'aaaa' is the optional address to load the file into.
+; Notes:
+;   - If no address is given, the file is loaded to its default location.
+<load_command> ::= "L" <filename> [ <address> ]
+<filename> ::= '"' <file_path> '"'
+
+; -----------------------------------------------------------------------------
+; Memory Dump Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Displays a memory dump in both hexadecimal and ASCII formats, allowing editing.
+; Usage:
+;   Maaaa [eeee]
+;     - 'M' starts the memory dump command.
+;     - 'aaaa' is the start address.
+;     - 'eeee' is the optional end address.
+; Notes:
+;   - Both hex and ASCII are shown for each memory line.
+<memory_dump_command> ::= "M" <address> [ <end_address> ]
+
+; -----------------------------------------------------------------------------
+; Occupy Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Fills a memory range with a specified byte value.
+; Usage:
+;   Oaaaa eeee xx
+;     - 'O' starts the occupy command.
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+;     - 'xx' is the byte value to fill with.
+; Notes:
+;   - All bytes in the range are set to the specified value.
+<occupy_command> ::= "O" <address> <end_address> <byte_value>
+
+; -----------------------------------------------------------------------------
+; Register Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Displays and allows editing of CPU registers (A, X, Y, SP, PC, flags).
+; Usage:
+;   R
+;     - 'R' shows the current register values and allows editing.
+; Notes:
+;   - Useful for debugging and code analysis.
+<register_command> ::= "R"
+
+; -----------------------------------------------------------------------------
+; Save Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Saves a memory range to a file on the selected device. Parameters are optional if a file was previously loaded.
+; Usage:
+;   S["filename" aaaa eeee]
+;     - 'S' starts the save command.
+;     - 'filename' is the name of the file to save (in quotes).
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+; Notes:
+;   - If no parameters are given, the last loaded file and addresses are used.
+<save_command> ::= "S" [ <filename> <address> <end_address> ]
+
+; -----------------------------------------------------------------------------
+; Move Addresses Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Adjusts all absolute addresses in a memory block to a new base address.
+; Usage:
+;   Vaaaa eeee tttt ssss dddd
+;     - 'V' starts the move addresses command.
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+;     - 'tttt', 'ssss', 'dddd' are additional parameters for address adjustment (see manual).
+; Notes:
+;   - Used for relocating code/data with absolute references.
+<move_addresses_command> ::= "V" <address> <end_address> <address> <address> <address>
+
+; -----------------------------------------------------------------------------
+; Write Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Copies a block of memory to a new location.
+; Usage:
+;   Waaaa eeee tttt
+;     - 'W' starts the write command.
+;     - 'aaaa' is the start address, 'eeee' is the end address.
+;     - 'tttt' is the target address.
+; Notes:
+;   - The source and destination ranges must not overlap.
+<write_command> ::= "W" <address> <end_address> <address>
+
+; -----------------------------------------------------------------------------
+; Check Equality Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Compares two memory ranges for equality.
+; Usage:
+;   =aaaa bbbb
+;     - '=' starts the check equality command.
+;     - 'aaaa' and 'bbbb' are the start addresses of the two ranges to compare.
+; Notes:
+;   - Reports the first difference found, if any.
+<check_equality_command> ::= "=" <address> <address>
+
+; -----------------------------------------------------------------------------
+; Convert Decimal Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Converts a decimal number to hexadecimal and binary representations.
+; Usage:
+;   =#nnn
+;     - '=' and '#' start the convert decimal command.
+;     - 'nnn' is the decimal number.
+; Notes:
+;   - Output shows both hex and binary equivalents.
+<convert_decimal_command> ::= "=#" <decimal_number>
+
+; -----------------------------------------------------------------------------
+; Convert Hexadecimal Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Converts a hexadecimal address to decimal and binary representations.
+; Usage:
+;   =$aaaa
+;     - '=' and '$' start the convert hex command.
+;     - 'aaaa' is the hex address.
+; Notes:
+;   - Output shows both decimal and binary equivalents.
+<convert_hex_command> ::= "=$" <address>
+
+; -----------------------------------------------------------------------------
+; Convert Binary Command
+; -----------------------------------------------------------------------------
+; Purpose:
+;   Converts a binary number to decimal and hexadecimal representations.
+; Usage:
+;   =%bbbb...
+;     - '=' and '%' start the convert binary command.
+;     - 'bbbb...' is the binary number.
+; Notes:
+;   - Output shows both decimal and hex equivalents.
+<convert_binary_command> ::= "=%" <binary_number>
+
+
+
+; --- Disk Monitor Mode ---
+; These commands are available only in SMON's disk monitor mode (for floppy #8).
+<disk_monitor_command> ::= <dm_start_command>         ; Enter disk monitor mode
+						| <dm_read_sector_command>    ; Read sector from disk
+						| <dm_write_sector_command>   ; Write sector to disk
+						| <dm_memory_dump_command>    ; Dump sector in memory
+						| <dm_floppy_error_command>   ; Show floppy error status
+						| <dm_exit_command>           ; Exit disk monitor mode
+
+; Start disk monitor (border yellow)
+<dm_start_command> ::= "Z"
+; Read Sector: Read track/sector into memory (next logical if omitted)
+<dm_read_sector_command> ::= "R" [ <track> <sector> ]
+; Write Sector: Write track/sector from memory to disk
+<dm_write_sector_command> ::= "W" [ <track> <sector> ]
+; Memory Dump: Display disk sector in memory
+<dm_memory_dump_command> ::= "M"
+; Floppy Error Status: Show current floppy error message
+<dm_floppy_error_command> ::= "@"
+; Exit disk monitor: Return to standard mode (border blue)
+<dm_exit_command> ::= "X"
+<track> ::= <byte_value>
+<sector> ::= <byte_value>
+
+
+; DOS Commands (unchanged, for file management)
+<dos_commands> ::= <at_command>
+			   | <hash_command>
+			   | <ls_command>
+			   | <ll_command>
+			   | <cd_command>
+			   | <md_command>
+			   | <rd_command>
+			   | <rm_command>
+			   | <cp_command>
+
+<at_command> ::= "@" [ <drive_number> ]
+<hash_command> ::= "#" <drive_number>
+<ls_command> ::= "ls" [ <directory_path> ]
+<ll_command> ::= "ll" ( <file_path> | <directory_path> )
+<cd_command> ::= "cd" <directory_path>
+<md_command> ::= "md" <directory_path>
+<rd_command> ::= "rd" <directory_path>
+<rm_command> ::= "rm" <file_path>
+<cp_command> ::= [ <drive_number> ":" ] <file_path> <file_path>
+
+
+
