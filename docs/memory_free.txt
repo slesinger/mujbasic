@@ -1,3 +1,7 @@
+# Memory used by MujBASIC
+
+// see constants.asm for related used addresses
+
 # Summary of Free Memory Areas in $0000-$0400 for Custom Applications
 
 $0002: 1 byte
@@ -41,11 +45,11 @@ Chapter 1: Zero Page
 | $00A5           | 1      | Cassette: Cassette Synchronization Character Countdown                      |
 | $00A6           | 1      | Cassette: Count of Characters in Tape I/O Buffer                            |
 | $00B0           | 1      | Cassette: Tape Timing                                                       |
-| $00B2-$00B3     | 2      | Cassette: Pointer: Start of Tape Buffer                                     |
+| $00B2-$00B3    *| 2      | Cassette: Pointer: Start of Tape Buffer                                     |
 | $00BE           | 1      | Cassette: Cassette Read/Write Block Count                                   |
 | $00BF           | 1      | Cassette: Tape Input Byte Buffer                                            |
 | $00C0           | 1      | Cassette: Tape Motor Interlock                                              |
-| $00C1-$00C2     | 2      | Cassette: I/O Start Address (used for tape I/O)                             |
+| $00C1-$00C2    *| 2      | Cassette: I/O Start Address (used for tape I/O)                             |
 | $00FB-$00FE     | 4      | FREEZP – Four free bytes of zero page for user programs                     |
 
 Chapter 2: Low Memory
@@ -53,7 +57,7 @@ Chapter 2: Low Memory
 | Address Range   | Length | Description                                                                 |
 |-----------------|--------|-----------------------------------------------------------------------------|
 | $013F-$01FF     | 193    | Cassette: Tape Input Error Log (part of stack area)                         |
-| $0200-$0258     | 89     | BASIC Line Editor Input Buffer ("BUF")                                      |
+| $0200-$0258    *| 89     | BASIC Line Editor Input Buffer ("BUF")                                      |
 | $0259-$0276     | 30     | BASIC: Tables for File Numbers, Device Numbers, Secondary Addresses         |
 | $0277-$0280     | 10     | BASIC: Keyboard Buffer (Queue)                                              |
 | $02A7-$02FF     | 89     | Unused – For machine language subroutines or graphics data storage          |

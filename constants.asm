@@ -5,19 +5,40 @@
 // This file contains all shared constants for the project.
 // ============================================================================
 
-// Zero page locations
-.const ZP_INDIRECT_ADDR = $b2  // +$b3 Repurposable Zero page indirect address pointer
+// Runtime variables Zero page locations
+.const SAVX = $02                  // 1 byte temp storage, often to save X register
+.const ZP_INDIRECT_ADDR = $b2      // +$b3 Repurposable Zero page indirect address pointer 1
+.const ZP_INDIRECT_ADDR_2 = $c1    // +$c2 Repurposable Zero page indirect address pointer 2
+.const TMP2 = $c3                  // usually holds start address
+.const PCH = $00                   // program counter high byte
+.const PCL = $00                   // program counter low byte
+.const REU_SIZE_BANKS = $FB        // Number of 64KB banks detected
+.const InputBuffer  = $0200        // Input buffer in RAM (safe area page 3, 256 bytes)
+.const parser_input_cursor = $0313 // Current position in parser input string
+.const InputLength  = $033C        // Current length of input (in RAM - safe area)
+.const CursorPos    = $033D        // Current cursor position (in RAM - safe area)
 
 // KERNAL routines
-.const GETIN        = $FFE4     // KERNAL get character from keyboard
-.const CHROUT       = $FFD2     // KERNAL character output
-.const CLRSCR      = $E544     // KERNAL clear screen routine
-
-// Input buffer and related variables
-.const InputBuffer  = $0340     // Input buffer in RAM (safe area page 3, 256 bytes)
-.const InputLength  = $033C     // Current length of input (in RAM - safe area)
-.const CursorPos    = $033D     // Current cursor position (in RAM - safe area)
-.const INPUT_LINE_BUFFER = $1000 // Input line buffer destination
+.const CLRSCR  = $E544             // KERNAL clear screen routine
+.const SETMSG  = $FF90             // set kernel message control flag
+.const SECOND  = $FF93             // set secondary address after LISTEN
+.const TKSA    = $FF96             // send secondary address after TALK
+.const LISTEN  = $FFB1             // command serial bus device to LISTEN
+.const TALK    = $FFB4             // command serial bus device to TALK
+.const SETLFS  = $FFBA             // set logical file parameters
+.const SETNAM  = $FFBD             // set filename
+.const ACPTR   = $FFA5             // input byte from serial bus
+.const CIOUT   = $FFA8             // output byte to serial bus
+.const UNTLK   = $FFAB             // command serial bus device to UNTALK
+.const UNLSN   = $FFAE             // command serial bus device to UNLISTEN
+.const CHKIN   = $FFC6             // define input channel
+.const CLRCHN  = $FFCC             // restore default devices
+.const INPUT   = $FFCF             // input a character (official name CHRIN)
+.const CHROUT  = $FFD2             // output a character
+.const LOAD    = $FFD5             // load from device
+.const SAVE    = $FFD8             // save to device
+.const STOP    = $FFE1             // check the STOP key
+.const GETIN   = $FFE4             // get a character
 
 // Input key codes
 .const ENTER_KEY    = $0D
@@ -32,6 +53,7 @@
 .const KEY_H = $48
 .const KEY_L = $4c
 .const KEY_P = $50
+.const KEY_R = $52
 .const KEY_S = $53
 
 // Screen and color RAM
@@ -56,15 +78,11 @@
 .const REU_LENGTH_LO   = $DF07  // Transfer length (low)
 .const REU_LENGTH_HI   = $DF08  // Transfer length (high)
 
-// Runtime variables (stored in zero page)
-.const REU_SIZE_BANKS  = $FB    // Number of 64KB banks detected
-
 // MujBASIC working area
 .const MUJBASIC_CURRENT_DRIVE = $0313 // Current drive number used as default for listing directory and file operations
 
 // Parser
-// .const PARSER_INPUT_PTR = $0200 // Pointer to parser input string. Input string is null terminated.
-.const PARSER_INPUT_PTR = $0900  // temporary
+.const PARSER_INPUT_PTR = InputBuffer  // temporary
 .const PARSER_MAX_INPUT_LEN = 89 // Maximum length of user input
 .const PARSER_WHITESPACE = $20 // ASCII space character used as whitespace in parser
 .const PARSER_END_OF_TABLE = $FF // Special marker indicating end of parser token table

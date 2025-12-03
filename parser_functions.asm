@@ -1,6 +1,5 @@
 #importonce
 #import "constants.asm"
-#import "global_vars.asm"
 
 // Returns next char from input string, or sets Carry flag if at end
 // Input_str is $00 terminated string

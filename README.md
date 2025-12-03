@@ -46,7 +46,7 @@ see parser directory
 ### Method 2: Command Line
 
 ```bash
-java -jar /path/to/KickAss.jar mujbasic.asm -o build/mujbasic.crt
+java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar mujbasic.asm -o build/mujbasic.bin
 ```
 
 ## Running the ROM
@@ -56,7 +56,7 @@ java -jar /path/to/KickAss.jar mujbasic.asm -o build/mujbasic.crt
 To test the ROM replacement in VICE (x64sc recommended):
 
 ```bash
-x64sc -basiccart build/mujbasic.crt
+x64sc -basic mujbasic.bin -reu -reusize 128
 ```
 
 Or use the "Build and Run in VICE" task from VS Code (requires VICE path configured in extension settings).

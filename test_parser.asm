@@ -2,16 +2,36 @@
 #import "parser_functions.asm"
 
 
+*= $0801 "Basic Upstart"
+    BasicUpstart(start)    // 10 sys$0810
+
+* = PARSER_INPUT_PTR
+.text "HELP"; .byte 0
+
+* = $1000
+
+// this is a test code that will read from PARSER_INPUT_PTR and output structure to $2000
+start:
+    // input_cursor = -1
+    lda #$ff
+    sta parser_input_cursor
+    jmp parse_input
+
+// Temporary parse done handler
+parse_done:
+    sta $0500
+    inc $d020
+    jmp parse_done
+
+
+
+
 // Main parser routine
 // Reads input string from PARSER_INPUT_PTR, parses it according to token tables and jumps ???
 
 parse_input:
-    // input_cursor = -1
-    lda #$ff
-    sta parser_input_cursor
     // skip_whitespace()
     jsr skip_whitespace
-    // TODO consider bcs > rts if end of string reached here (only whitespace line or $00)
     // Read inital command character
     jsr next_char        // cursor moved, A holds next char, Y destroyed
     // Initialize command parsing table search
@@ -49,11 +69,11 @@ match_found:
     tax // store low byte of next table address in X because storing it directly sta ZP_INDIRECT_ADDR would destroy the next indirect reading
     iny  // point to high byte of next table
     lda (ZP_INDIRECT_ADDR),y
-    stx ZP_INDIRECT_ADDR    // low
-    sta ZP_INDIRECT_ADDR+1  // high
+    sta ZP_INDIRECT_ADDR+1
+    stx ZP_INDIRECT_ADDR
     // read next char into A (Y destroyed)
     jsr next_char
-    bcs end_of_command  // if end of string -> end of command, read address of first item in the current table to execute command
+    bcs end_of_command  // if end of string -> end of command, read address to execute command
     // if next char is white space, end of command also
     cmp #PARSER_WHITESPACE
     beq end_of_command
@@ -70,14 +90,12 @@ end_of_command:
     tax  // do not break next indirect reading
     iny
     lda (ZP_INDIRECT_ADDR),y
-    sta ZP_INDIRECT_ADDR_2+1
-    stx ZP_INDIRECT_ADDR_2
+    sta cmd_exec_addr+2
+    stx cmd_exec_addr+1
     // jump to command execution
 cmd_exec_addr:
-    jmp (ZP_INDIRECT_ADDR_2)  // rewritable address
+    jsr $ffff  // rewritable address
+    jmp parse_done
 
-// parse done handler
-parse_done:
-    rts
 
 #import "parser_tables.asm"

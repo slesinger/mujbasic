@@ -8,7 +8,7 @@
 // Constants
 
 #import "constants.asm"
-#import "input_dispatch.asm"
+#import "parser.asm"
 // ============================================================================
 // Main Input Handler
 // ============================================================================
@@ -31,15 +31,12 @@ HandleInput:
     bne !+
     jmp HandleCursorRight
 !:
-    
     // Regular character - insert at cursor position
     ldx InputLength
-    cpx #255          // Max buffer size check
+    cpx #PARSER_MAX_INPUT_LEN   // Max buffer size check
     beq InputDone       // Buffer full, ignore
-    
     // Save character temporarily
     pha
-    
     // Check if we need to insert (cursor not at end)
     ldx CursorPos
     cpx InputLength
@@ -61,7 +58,6 @@ InsertAtEnd:
     pla
     ldx CursorPos
     sta InputBuffer,x
-    
     // Check if we inserted at the end
     cpx InputLength
     beq InsertedAtEnd
@@ -125,55 +121,22 @@ InputDone:
 // Handle Enter Key
 // ============================================================================
 HandleEnter:
-    // Copy input buffer to $1000
-    lda InputLength
-    beq EmptyInput      // Skip copy if empty
-    
-    ldx #0
-CopyLoop:
-    lda InputBuffer,x
-    sta INPUT_LINE_BUFFER,x
-    inx
-    cpx InputLength
-    bcc CopyLoop        // Continue while X < InputLength
-    
-EmptyInput:
     // Null terminate
     lda #0
     ldx InputLength
-    sta INPUT_LINE_BUFFER,x
+    sta InputBuffer,x
+    // New line
+    lda #$0D
+    jsr CHROUT
+    // parse and execute
+    jsr parse_input
     
     // Clear input buffer and reset cursor
+    lda #$00
     sta InputLength
+    sta InputBuffer
+    sta InputBuffer+1
     sta CursorPos
-    
-    // Print newline
-    lda #ENTER_KEY
-    jsr CHROUT
-
-
-    // Dispatch the input line as a command
-    jsr InputDispatch
-
-    jsr PrintResponse
-
-    rts
-// ============================================================================
-// Print Response Routine
-// ============================================================================
-// Prints null-terminated string at $1000 using CHROUT
-// ============================================================================
-PrintResponse:
-    ldy #0
-PrintResponseLoop:
-    lda $1000,y
-    beq PrintResponseDone
-    jsr CHROUT
-    iny
-    bne PrintResponseLoop
-PrintResponseDone:
-    lda #ENTER_KEY // newline (carriage return)
-    jsr CHROUT
     rts
 
 // ============================================================================
