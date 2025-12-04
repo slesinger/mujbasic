@@ -1,7 +1,7 @@
 #importonce
 #import "constants.asm"
 
-// Returns next char from input string, or sets Carry flag if at end
+// Returns next char from input string, or sets Carry flag if at end. Move parser_input_cursor to the position of the returned char.
 // Input_str is $00 terminated string
 // Output: A = next char + Carry flag cleared, or Carry flag set if end of string
 // Retains: X
@@ -75,12 +75,46 @@ def skip_whitespace():
 skip_whitespace:
 skip_whitespace_loop:
     jsr peek_char                  // A = next char, or Carry set if end
-    bcs skip_whitespace_done       // If Carry set (end of input), done
+    bcs skip_whitespace_eos       // If Carry set (end of input), done
     cmp #PARSER_WHITESPACE         // Compare A with whitespace char
-    bne skip_whitespace_done
+    bne skip_whitespace_eows
     inc parser_input_cursor        // input_cursor += 1
     jmp skip_whitespace_loop
-skip_whitespace_done:
+skip_whitespace_eows:
+    clc
+skip_whitespace_eos:
     rts
 
 
+// Output: filename pointer at ZP_INDIRECT_ADDR_2
+// Output: filename length in FNLEN
+// Error: Carry flag if there is no filename
+parse_file_or_path:
+    jsr skip_whitespace
+    bcc parse_file_ws_skipped_ok
+    sec  // report error as end of string reached without filename argument
+    rts
+parse_file_ws_skipped_ok:
+    jsr next_char
+    // return starting pointer of filename
+    lda parser_input_cursor       // assumption: PARSER_INPUT_PTR always starts at $xx00
+    sta ZP_INDIRECT_ADDR_2        // store low byte of filename pointer
+    lda #>PARSER_INPUT_PTR
+    sta ZP_INDIRECT_ADDR_2 + 1    // store high byte of filename pointer
+    
+    // calculate length of filename
+    lda parser_input_cursor
+    sta SAVX                       // initial cursor position
+parse_file_loop:
+    jsr next_char                  // A = next char, or Carry set if end
+    bcs parse_filename_done            // If Carry set (end of input), done
+    cmp #PARSER_WHITESPACE         // Compare A with whitespace char
+    bne parse_file_loop
+parse_filename_done:
+    // length = current cursor - initial cursor
+    lda parser_input_cursor
+    sec
+    sbc SAVX
+    sta FNLEN                      // store filename length
+    clc  // TODO
+    rts

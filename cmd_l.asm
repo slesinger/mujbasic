@@ -1,3 +1,4 @@
+#import "parser_functions.asm"
 #import "floppy.asm"
 // -----------------------------------------------------------------------------
 // Load Command
@@ -15,5 +16,8 @@
 
 
 cmd_l:
-    jsr LoadFile
+    // Parse mandatory filename
+    jsr parse_file_or_path
+    // Check for optional address
+    jsr load_file
     jmp parse_done  // jump to parser completion handler in parser.asm

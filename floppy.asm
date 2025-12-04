@@ -319,29 +319,30 @@ open2_status_prefix:
 */
 
 // Filename is temporary fixed to "SOUND2" PRG. Its start address is $1800
-// Input: TBD
+// Input: filename in pointer ZP_INDIRECT_ADDR_2
+// Input: filename length in FNLEN
 // Output: None, file loaded
 // Registers modified: A, X, Y
-LoadFile:
+load_file:
     lda #$01  // logical number, can have up to 5 opened at the same time
     ldx #$08  // device number
     ldy #$01  // command, secondary address normally 1 to use PRG address (or .X , .Y LOAD ADDRESS IF SA=0 )
     jsr SETLFS          // call KERNAL set logical file parameters
 
-    lda #$06            // length of filename
-    ldx #<SOUND2        // low byte of filename address
-    ldy #>SOUND2        // high byte of filename address
+    lda FNLEN            // length of filename
+    ldx ZP_INDIRECT_ADDR_2  // low byte of filename address
+    ldy ZP_INDIRECT_ADDR_2  // high byte of filename address
     jsr SETNAM          // call KERNAL set file name
 
     lda #$00      // load (not verify)
     ldx #$00
     ldy #$50           // load to $5000
     jsr LOAD
-    bcc LoadFileDone  // if no error, done
+    bcc load_file_done  // if no error, done
     // Error occurred during load
-    jsr ShowStatus
+    jsr show_status
     rts
-LoadFileDone:
+load_file_done:
     // Display load start-end address
     // TODO to get start address of the load in non-relocatable mode, first two bytes need to be loaded first with open/read/read/close
     lda #@KEY_SPACE
@@ -357,7 +358,7 @@ LoadFileDone:
     jsr CHROUT
     rts
 
-SaveFile:
+save_file:
     lda #$01  // logical number, can have up to 5 opened at the same time
     ldx #$08  // device number
     ldy #$01  // secondary address, command, use PRG address  (or .X , .Y LOAD ADDRESS IF SA=0 )
@@ -377,14 +378,13 @@ SaveFile:
     ldx #$2b
     ldy #$04           // load up to $042b
     jsr SAVE
-jmp *
     rts
 
 
 // Print status byte in A as two hex digits
 // Input: A = status byte
 // Registers modified: A, X, Y
-ShowStatus:
+show_status:
     sta SAVX      // save status byte
     lda #KEY_E
     jsr CHROUT

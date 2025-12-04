@@ -5,7 +5,7 @@
     BasicUpstart(start)    // 10 sys$0810
 * = $0810
 start:
-    // jsr PrintDirectory
-    jsr LoadFile
-    // jsr SaveFile
+    // jsr print_directory
+    jsr load_file
+    // jsr save_file
     rts

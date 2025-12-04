@@ -13,7 +13,7 @@ build:
 	java -jar $(KICKASS_JAR) $(ASM_SRC)
 
 run: build
-	x64sc -basic $(BIN_OUT) -reu -reusize 128
+	x64sc -basic $(BIN_OUT) -reu -reusize 128 -8 data/001a.d64
 
 run-std:
 	x64sc -basic /usr/local/share/vice/C64/basic-901226-01.bin -reu -reusize 128 -8 data/001a.d64 $(ARG)
