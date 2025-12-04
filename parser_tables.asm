@@ -1,5 +1,6 @@
 #import "constants.asm"
 #import "cmd_empty.asm"
+#import "cmd_g.asm"
 #import "cmd_help.asm"
 #import "cmd_l.asm"
 #import "cmd_lsll.asm"
@@ -19,6 +20,7 @@
 .byte $88, $88, $88, $88
 tbl:
 .byte KEY_NULL, <tbl_null, >tbl_null  // empty line
+.byte KEY_G, <tbl_g, >tbl_g
 .byte KEY_H, <tbl_h, >tbl_h
 .byte KEY_L, <tbl_l, >tbl_l
 .byte KEY_R, <tbl_r, >tbl_r
@@ -28,6 +30,12 @@ tbl:
 
 tbl_null:
 .byte KEY_NULL, <cmd_empty, >cmd_empty  // empty line
+
+
+// Top level G
+tbl_g:
+.byte KEY_NULL, <cmd_g, >cmd_g  // g without arguments  // TODO g has one mandatory argument - address
+.byte PARSER_END_OF_TABLE
 
 
 // Top level H

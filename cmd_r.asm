@@ -22,11 +22,11 @@ DSPLYR:
     jsr CHROUT
     lda #$20
     jsr CHROUT
-    lda PCH             // print 2-byte program counter
+    // lda PCH             // print 2-byte program counter
     jsr WRTWO
     ldy #1              // start 1 byte after PC high byte
 DISJ:
-    lda PCH,Y           // loop through rest of the registers
+    // lda PCH,Y           // loop through rest of the registers
     jsr WRBYTE          // print 1-byte register value, write two hex digits
     iny 
     cpy #7              // there are a total of 5 registers to print
@@ -37,3 +37,5 @@ DISJ:
     jsr CHROUT
     // execute actual job
     jmp parse_done  // jump to parser completion handler in parser.asm
+
+// TODO add BRK handler to return here for editing registers, see SMON

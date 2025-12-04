@@ -9,16 +9,31 @@
 .const SAVX = $02                  // 1 byte temp storage, often to save X register
 .const ZP_INDIRECT_ADDR = $b2      // +$b3 Repurposable Zero page indirect address pointer 1
 .const ZP_INDIRECT_ADDR_2 = $c1    // +$c2 Repurposable Zero page indirect address pointer 2
+.const TMP0 = $c1                  // +$c2 Repurposable Zero page indirect address pointer 2 used in SMON
 .const TMP2 = $c3                  // usually holds start address
 .const PNT = $d1                   // Read-only $00D1-$00D2	PNT	Pointer to the Address of the Current Screen Line
 .const PNTR = $d3                  // Read-only $00D3	PNTR	Cursor Column on Current Line 0-79
-// .const PCH = $00                   // program counter high byte
-// .const PCL = $00                   // program counter low byte
 .const REU_SIZE_BANKS = $FB        // Number of 64KB banks detected
+
 .const InputBuffer  = $0200        // Input buffer in RAM (safe area page 3, 256 bytes)
-.const parser_input_cursor = $0313 // Current position in parser input string
+// 8 bytes $0334-$033B global vars Eight free bytes for user vectors or other data.
+.const PCH = $0334                   // program counter high byte
+.const PCL = $0335                   // program counter low byte
+.const SR = $0336
+.const ACC = $0337
+.const XR = $0338
+.const YR = $0339
+.const SP = $033A
+.const parser_input_cursor = $033B // Current position in parser input string, only used when parsing
+
+// 192 bytes cassete buffer $033C-$03FB
 .const InputLength  = $033C        // Current length of input (in RAM - safe area)
 .const CursorPos    = $033D        // Current cursor position within user input line (in RAM - safe area)
+
+
+
+
+
 
 // KERNAL routines
 .const CLRSCR  = $E544             // KERNAL clear screen routine
