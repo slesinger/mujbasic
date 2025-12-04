@@ -1,3 +1,4 @@
+#import "floppy.asm"
 // -----------------------------------------------------------------------------
 // Load Command
 // -----------------------------------------------------------------------------
@@ -14,8 +15,5 @@
 
 
 cmd_l:
-    // execute l command
-    // TODO
-    lda #$33
-    // execute actual job
+    jsr LoadFile
     jmp parse_done  // jump to parser completion handler in parser.asm

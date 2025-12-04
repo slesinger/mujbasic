@@ -62,14 +62,14 @@
 .const GETIN   = $FFE4             // get a character
 
 // Input key codes
-.const ENTER_KEY    = $0D
-.const DELETE_KEY   = $14
-.const CURSOR_LEFT  = $9D
-.const CURSOR_RIGHT = $1D
-.const SPACE_CHAR   = $20
-
 .const KEY_NULL = $00
+.const KEY_RETURN = $0D
+.const KEY_DELETE = $14
+.const KEY_CURSOR_RIGHT = $1D
 .const KEY_SPACE = $20
+.const KEY_DOLLAR = $24
+.const KEY_MINUS = $2d
+.const KEY_EQUAL = $3d
 .const KEY_A = $41
 .const KEY_B = $42
 .const KEY_C = $43
@@ -96,6 +96,7 @@
 .const KEY_X = $58
 .const KEY_Y = $59
 .const KEY_Z = $5a
+.const KEY_CURSOR_LEFT  = $9D
 
 // Screen and color RAM
 .const SCREEN_RAM   = $0400     // Screen memory start

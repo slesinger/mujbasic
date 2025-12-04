@@ -1,6 +1,21 @@
 #importonce 
 #import "constants.asm"
 
+// print single hex nibble in A (0..15) as ASCII to screen via CHROUT
+print_nibble:
+    cmp #10
+    bcc pn_digit
+    // A >= 10 -> 'A'..'F'
+    clc
+    adc #55             // 10 + 55 = 65 'A'
+    jmp pn_out
+pn_digit:
+    clc
+    adc #48             // 0 -> '0'
+pn_out:
+    jsr $FFD2
+    rts
+
 // print address
 SHOWAD:
     lda TMP2
@@ -98,14 +113,14 @@ SNDMSG:
 MSGBAS:
 MSG2:
     .text "   PC  SR AC XR YR SP   V0.1"  // header for registers
-    .byte ENTER_KEY, $80    // end of message marker
+    .byte KEY_RETURN, $80    // end of message marker
 MSG_UNKNOWN_COMMAND:
     .text "COMMAND NOT FOUND"
-    .byte ENTER_KEY, $80
+    .byte KEY_RETURN, $80
 MSG_HELP:
     .text "AVAILABLE COMMANDS:"
-    .byte ENTER_KEY
+    .byte KEY_RETURN
     .text " HELP - DISPLAY THIS HELP MESSAGE"
-    .byte ENTER_KEY
+    .byte KEY_RETURN
     .text " R    - DISPLAY CPU REGISTERS"
-    .byte ENTER_KEY, $80
+    .byte KEY_RETURN, $80

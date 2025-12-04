@@ -1,6 +1,8 @@
 .importonce
 #import "constants.asm"
+#import "utils.asm"
 
+/*
 // floppy.asm - PrintDirectory routine for C64
 // Prints the disk directory in standard C64 format
 
@@ -257,6 +259,8 @@ save_lfn: .byte 0
 save_dev: .byte 0
 save_sec: .byte 0
 
+
+
 err_msg:
     .text "DIR ERROR"
     .byte 0
@@ -312,55 +316,13 @@ setlfs2_status_prefix:
 open2_status_prefix:
     .text "OPEN2 ST="
     .byte 0
-
-// small helper: print status byte in A as two hex digits
-// clobbers A, X, Y
-show_status:
-    sta save_status      // save status byte
-    // print high nibble
-    lda save_status
-    lsr
-    lsr
-    lsr
-    lsr                 // A = high nibble
-    jsr print_nibble
-    // print low nibble
-    lda save_status
-    and #$0F
-    jsr print_nibble
-    // print newline CR/LF
-    lda #13
-    jsr $FFD2
-    lda #10
-    jsr $FFD2
-    rts
-
-// print single hex nibble in A (0..15) as ASCII to screen via CHROUT
-print_nibble:
-    cmp #10
-    bcc pn_digit
-    // A >= 10 -> 'A'..'F'
-    clc
-    adc #55             // 10 + 55 = 65 'A'
-    jmp pn_out
-pn_digit:
-    clc
-    adc #48             // 0 -> '0'
-pn_out:
-    jsr $FFD2
-    rts
-
-save_status: .byte 0
-
+*/
 
 // Filename is temporary fixed to "SOUND2" PRG. Its start address is $1800
+// Input: TBD
+// Output: None, file loaded
+// Registers modified: A, X, Y
 LoadFile:
-    // lda #$01           // logical file number
-    // ldx #$08           // device 8
-    // ldy #$00           // secondary address 0
-    // jsr SetLFSAndOpen
-    // rts
-
     lda #$01  // logical number, can have up to 5 opened at the same time
     ldx #$08  // device number
     ldy #$01  // command, secondary address normally 1 to use PRG address (or .X , .Y LOAD ADDRESS IF SA=0 )
@@ -375,7 +337,24 @@ LoadFile:
     ldx #$00
     ldy #$50           // load to $5000
     jsr LOAD
-
+    bcc LoadFileDone  // if no error, done
+    // Error occurred during load
+    jsr ShowStatus
+    rts
+LoadFileDone:
+    // Display load start-end address
+    // TODO to get start address of the load in non-relocatable mode, first two bytes need to be loaded first with open/read/read/close
+    lda #@KEY_SPACE
+    jsr CHROUT
+    lda #KEY_MINUS
+    jsr CHROUT
+    lda #@KEY_DOLLAR
+    jsr CHROUT
+    stx TMP2
+    sty TMP2+1      // save end address in TMP2/TMP2+1
+    jsr SHOWAD
+    lda #KEY_RETURN
+    jsr CHROUT
     rts
 
 SaveFile:
@@ -400,6 +379,39 @@ SaveFile:
     jsr SAVE
 jmp *
     rts
+
+
+// Print status byte in A as two hex digits
+// Input: A = status byte
+// Registers modified: A, X, Y
+ShowStatus:
+    sta SAVX      // save status byte
+    lda #KEY_E
+    jsr CHROUT
+    lda #KEY_R
+    jsr CHROUT
+    lda #KEY_R
+    jsr CHROUT
+    lda #KEY_SPACE
+    jsr CHROUT
+    lda #KEY_DOLLAR
+    jsr CHROUT
+    // print high nibble
+    lda SAVX
+    lsr
+    lsr
+    lsr
+    lsr                 // A = high nibble
+    jsr print_nibble
+    // print low nibble
+    lda SAVX
+    and #$0F
+    jsr print_nibble
+    lda #KEY_RETURN
+    jsr CHROUT
+    rts
+
+
 
 SOUND2: .text "SOUND2"
 MEDLIK: .text "MEDLIK"

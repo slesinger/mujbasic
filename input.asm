@@ -18,16 +18,16 @@
 
 HandleInput:
     // Handle special keys
-    cmp #ENTER_KEY
+    cmp #KEY_RETURN
     bne !+
     jmp HandleEnter
-!:  cmp #DELETE_KEY
+!:  cmp #KEY_DELETE
     bne !+
     jmp HandleDelete
-!:  cmp #CURSOR_LEFT
+!:  cmp #KEY_CURSOR_LEFT
     bne !+
     jmp HandleCursorLeft
-!:  cmp #CURSOR_RIGHT
+!:  cmp #KEY_CURSOR_RIGHT
     bne !+
     jmp HandleCursorRight
 !:
@@ -81,7 +81,7 @@ RedrawInsert:
     
 RedrawInsertDone:
     // Print space to clear old character
-    lda #SPACE_CHAR
+    lda #KEY_SPACE
     jsr CHROUT
     
     // Calculate how many positions to move back
@@ -101,7 +101,7 @@ RedrawInsertDone:
     
 MoveBackInsert:
     beq DoneInsert
-    lda #CURSOR_LEFT
+    lda #KEY_CURSOR_LEFT
     jsr CHROUT
     dex
     jmp MoveBackInsert
@@ -143,7 +143,7 @@ HandleEnter:
     sta ($b2),y
     
     // New line
-    lda #ENTER_KEY
+    lda #KEY_RETURN
     jsr CHROUT
     // parse and execute
     jsr parse_input
@@ -183,7 +183,7 @@ DeleteShiftDone:
     dec InputLength
     
     // Move cursor back visually
-    // lda #CURSOR_LEFT
+    // lda #KEY_CURSOR_LEFT
     // jsr CHROUT
     
     // Redraw from current cursor position to end
@@ -198,7 +198,7 @@ RedrawDelete:
     
 RedrawDeleteClear:
     // Print space to clear the deleted character
-    lda #SPACE_CHAR
+    lda #KEY_SPACE
     jsr CHROUT
     
     // Move cursor back to correct position
@@ -208,7 +208,7 @@ RedrawDeleteClear:
     beq DoneDelete
     tax
 MoveBackDelete:
-    lda #CURSOR_LEFT
+    lda #KEY_CURSOR_LEFT
     jsr CHROUT
     dex
     bne MoveBackDelete
@@ -223,7 +223,7 @@ HandleCursorLeft:
     lda CursorPos
     beq !done+          // At start, can't go left
     dec CursorPos
-    lda #CURSOR_LEFT
+    lda #KEY_CURSOR_LEFT
     jsr CHROUT
 !done:
     rts
@@ -236,7 +236,7 @@ HandleCursorRight:
     cmp InputLength
     bcs !done+          // At or beyond end of input, can't go right
     inc CursorPos
-    lda #CURSOR_RIGHT
+    lda #KEY_CURSOR_RIGHT
     jsr CHROUT
 !done:
     rts
