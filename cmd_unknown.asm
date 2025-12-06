@@ -11,6 +11,10 @@
 //   - Does not execute any command.
 
 cmd_unknown:
+
+lda #$0D
+jsr CHROUT
+
     ldy #MSG_UNKNOWN_COMMAND - MSGBAS    // display headers
     jsr SNDMSG
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm

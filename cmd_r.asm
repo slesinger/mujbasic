@@ -14,6 +14,7 @@
 // <register_command> ::= "R"
 
 cmd_r:
+    ParsingInputsDone() // finish parsing input line
 // display registers [R]
 DSPLYR:
     ldy #MSG2-MSGBAS    // display headers
@@ -36,6 +37,6 @@ DISJ:
     lda #$0D
     jsr CHROUT
     // execute actual job
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm
 
 // TODO add BRK handler to return here for editing registers, see SMON

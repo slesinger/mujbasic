@@ -19,27 +19,26 @@ cmd_g:
     // Error parsing filename, handle error
     lda #$03  // TODO error parsing address, print error message
     sta $d020
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm
 !:
     bne !+
     // No address provided, handle error
     lda #$04  // TODO no address provided, print error message
     sta $d020
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm
 !:
     lda SAVY           // check if high byte is not 0 - indicates no address has been read
     bne !+
     lda #$05
     sta $d020         // TODO address in zero page not allowed, print error message
-    jmp parse_done    // jump to parser completion handler in parser.asm
+    CommandDone()    // jump to parser completion handler in parser.asm
 !:
+    ParsingInputsDone() // finish parsing input line
     // Address parsed successfully, JMP to it
     lda SAVX            // load A from saved low byte
     sta PCL             // set PC low byte
-    sta $0600
     lda SAVY            // load A from saved high byte
     sta PCH             // set PC high byte
-    sta $0601
 
     ldx SP              // load stack pointer from memory
     txs                 // save in SP register
@@ -57,7 +56,7 @@ cmd_g:
     inc $d021
     rti                 // return from interrupt (pops PC and SR)
 
-    // jmp parse_done  // jump to parser completion handler in parser.asm
+    // CommandDone()  // jump to parser completion handler in parser.asm
 
 // copy TMP0 to PC
 COPY1P:

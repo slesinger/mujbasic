@@ -66,8 +66,8 @@ DSPBYT:
     jsr SUBA1           // decrement line counter
     bcs DSPBYT          // show another line until it's < 0
 DSPMX:
-    jmp parse_done      // back to main loop
+    CommandDone()      // back to main loop
 MERROR:
     jmp ERROR           // handle error
 
-    jmp parse_done      // jump to parser completion handler in parser.asm
+    CommandDone()      // jump to parser completion handler in parser.asm

@@ -22,6 +22,7 @@ next_char_exec:
     cpy #PARSER_MAX_INPUT_LEN       // if input_cursor >= PARSER_MAX_INPUT_LEN
     bcs next_char_return_none       //   return None
 	lda PARSER_INPUT_PTR,y          // A = input_str[y]  A holds next character in string
+    and #$7f                        // mask high bit just in case it is reversed, it is accepted as normal character
     beq next_char_return_none       // If A == $00, null terminated string, return None (set Carry flag)
     clc                             // Clear Carry flag to indicate valid character
     rts
@@ -54,6 +55,7 @@ peek_cmd_end:
     cpy #PARSER_MAX_INPUT_LEN       // if input_cursor >= PARSER_MAX_INPUT_LEN
     bcs next_char_return_none       //   return None
 	lda PARSER_INPUT_PTR,y          // A = input_str[y]  A holds next character in string
+    and #$7f
     cmp #PARSER_WHITESPACE         // Compare A with whitespace char
     beq next_char_return_none       // If A == $00, return None (set Carry flag)
     clc                             // Clear Carry flag to indicate valid character
@@ -96,12 +98,15 @@ parse_file_or_path:
     rts
 parse_file_ws_skipped_ok:
     jsr next_char
-    // return starting pointer of filename
-    lda parser_input_cursor       // assumption: PARSER_INPUT_PTR always starts at $xx00
-    sta ZP_INDIRECT_ADDR        // store low byte of filename pointer
+    // return starting pointer of filename and add to it current cursor position
+    clc
+    lda #<PARSER_INPUT_PTR
+    adc parser_input_cursor
+    sta ZP_INDIRECT_ADDR
     lda #>PARSER_INPUT_PTR
-    sta ZP_INDIRECT_ADDR + 1    // store high byte of filename pointer
-    
+    adc #$00
+    sta ZP_INDIRECT_ADDR + 1
+
     // calculate length of filename
     lda parser_input_cursor
     sta SAVX                       // initial cursor position
@@ -118,6 +123,7 @@ parse_filename_done:
     sta FNLEN                      // store filename length
     clc  // TODO
     rts
+
 
 // Parse hexadecimal address from input string
 // Input: None

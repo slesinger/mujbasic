@@ -20,17 +20,19 @@ cmd_l:
     jsr parse_file_or_path
     bcc !+
     // Error parsing filename, handle error
-    lda #$02  // TODO wrong filename, print error message
+    lda #RED  // TODO wrong filename, print error message
     sta $d020
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm
 
 !:
     // Check for optional address
     jsr parse_address
     bcc !+
     // Error parsing filename, handle error
-    lda #$03  // TODO error parsing address, print error message
+    lda #CYAN  // TODO error parsing address, print error message
     sta $d020
 !:
+    ParsingInputsDone() // finish parsing input line
+
     jsr load_file
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm

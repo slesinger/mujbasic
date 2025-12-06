@@ -1,3 +1,4 @@
+#import "constants.asm"
 // -----------------------------------------------------------------------------
 // No Command
 // -----------------------------------------------------------------------------
@@ -10,4 +11,4 @@
 
 cmd_empty:
     // execute empty command (just ENTER)
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm

@@ -20,4 +20,4 @@ cmd_help:
     lda #$32
     // execute actual job
 
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm

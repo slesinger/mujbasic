@@ -20,7 +20,6 @@
 .const TMP2 = $c3                  // usually holds start address
 .const REU_SIZE_BANKS = $FB        // Number of 64KB banks detected
 
-.const InputBuffer  = $0200        // Input buffer in RAM (safe area page 3, 256 bytes)
 // 8 bytes $0334-$033B global vars Eight free bytes for user vectors or other data.
 // Next 7 bytes must follow in this order, do not change order!
 .const PCH = $0334                 // program counter high byte
@@ -34,7 +33,7 @@
 
 // 192 bytes cassete buffer $033C-$03FB
 .const InputLength  = $033C        // Current length of input (in RAM - safe area)
-.const CursorPos    = $033D        // Current cursor position within user input line (in RAM - safe area)
+.const CursorPos = $033D        // Current cursor position within user input line (in RAM - safe area)
 .const DIGCNT = $033e              // digit counter for RDVAL
 .const NUMBIT = $033f              // number of bits per digit for RDVAL
 .const INDIG = $0340               // input digit value for RDVAL
@@ -141,6 +140,75 @@
 .const KEY_Z = $5a
 .const KEY_CURSOR_LEFT  = $9D
 
+
+// Screen Codes
+.const SCR_AMPERSAND = $00
+.const SCR_Aa = $01
+.const SCR_Bb = $02
+.const SCR_Cc = $03
+.const SCR_Dd = $04
+.const SCR_Ee = $05
+.const SCR_Ff = $06
+.const SCR_Gg = $07
+.const SCR_Hh = $08
+.const SCR_Ii = $09
+.const SCR_Jj = $0A
+.const SCR_Kk = $0B
+.const SCR_Ll = $0C
+.const SCR_Mm = $0D
+.const SCR_Nn = $0E
+.const SCR_Oo = $0F
+.const SCR_Pp = $10
+.const SCR_Qq = $11
+.const SCR_Rr = $12
+.const SCR_Ss = $13
+.const SCR_Tt = $14
+.const SCR_Uu = $15
+.const SCR_Vv = $16
+.const SCR_Ww = $17
+.const SCR_Xx = $18
+.const SCR_Yy = $19
+.const SCR_Zz = $1A
+.const SCR_OPEN_SQUARE_BRACKET = $1B
+.const SCR_POUND = $1C
+.const SCR_CLOSE_SQUARE_BRACKET = $1D
+.const SCR_ARROW_UP = $1E
+.const SCR_ARROW_LEFT = $1F
+.const SCR_SPACE = $20
+.const SCR_EXCLAMATION = $21
+.const SCR_QUOTE = $22
+.const SCR_HASH = $23
+.const SCR_DOLLAR = $24
+.const SCR_PERCENT = $25
+.const SCR_OPEN_BRACKET = $28
+.const SCR_CLOSE_BRACKET = $29
+.const SCR_ASTERISK = $2A
+.const SCR_PLUS = $2B
+.const SCR_COMMA = $2C
+.const SCR_MINUS = $2D
+.const SCR_DOT = $2E
+.const SCR_SLASH = $2F
+.const SCR_0 = $30
+.const SCR_1 = $31
+.const SCR_2 = $32
+.const SCR_3 = $33
+.const SCR_4 = $34
+.const SCR_5 = $35
+.const SCR_6 = $36
+.const SCR_7 = $37
+.const SCR_8 = $38
+.const SCR_9 = $39
+.const SCR_COLON = $3A
+.const SCR_SEMICOLON = $3B
+.const SCR_LESS_THAN = $3C
+.const SCR_EQUAL = $3D
+.const SCR_GREATER_THAN = $3E
+.const SCR_QUESTION_MARK = $3F
+
+.const SCR_RVS_AMPERSAND = $80
+.const SCR_RVS_Aa = $81
+
+
 // Screen and color RAM
 .const SCREEN_RAM   = $0400     // Screen memory start
 .const COLOR_RAM    = $D800     // Color memory start
@@ -148,9 +216,22 @@
 .const BG_COLOR     = $D021     // Background color register
 
 // Colors
-.const LIGHT_BLUE   = $0E
-.const BLUE         = $06
+.const BLACK        = $00
 .const WHITE        = $01
+.const RED          = $02
+.const CYAN         = $03
+.const PURPLE       = $04
+.const GREEN        = $05
+.const BLUE         = $06
+.const YELLOW       = $07
+.const ORANGE       = $08
+.const BROWN        = $09
+.const LIGHT_RED    = $0A
+.const DARK_GRAY    = $0B
+.const GRAY         = $0C
+.const LIGHT_GREEN  = $0D
+.const LIGHT_BLUE   = $0E
+.const LIGHT_GRAY   = $0F
 
 // REU (RAM Expansion Unit) registers
 .const REU_STATUS      = $DF00  // Status register
@@ -167,13 +248,23 @@
 .const MUJBASIC_CURRENT_DRIVE = $0313 // Current drive number used as default for listing directory and file operations
 
 // Parser
-.const PARSER_INPUT_PTR = InputBuffer  // temporary
+.const PARSER_INPUT_PTR = $0200  // BASIC line input buffer start
 .const PARSER_MAX_INPUT_LEN = 79 // Maximum length of user input
 .const PARSER_WHITESPACE = $20 // ASCII space character used as whitespace in parser
 .const PARSER_END_OF_TABLE = $FF // Special marker indicating end of parser token table
 
 
 // MACROS
+
+.macro ParsingInputsDone() {
+    lda #KEY_RETURN
+    jsr CHROUT
+}
+
+.macro CommandDone() {
+    jmp parse_done
+}
+
 
 // BRK handler
 .macro BreakHandler() {

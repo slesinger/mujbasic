@@ -17,6 +17,8 @@
 // <ll_command> ::= "ll" [ <ws> ( <file_or_path> ) ]  ; command code 25
 
 cmd_ll:
+    ParsingInputsDone() // finish parsing input line
+
     // filename = $
     lda #KEY_DOLLAR
     sta $c000  // will be overwritten but who cares
@@ -79,7 +81,7 @@ line_done:
     sta ZP_INDIRECT_ADDR + 1
     jmp line_loop
 end_of_dir:
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm
 
 cmd_ls:
-    jmp parse_done  // jump to parser completion handler in parser.asm
+    CommandDone()  // jump to parser completion handler in parser.asm

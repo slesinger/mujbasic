@@ -9,6 +9,7 @@ parse_input:
     // input_cursor = -1
     lda #$ff
     sta parser_input_cursor
+
     // skip_whitespace()
     jsr skip_whitespace
     // TODO consider bcs > rts if end of string reached here (only whitespace line or $00)

@@ -354,11 +354,11 @@ load_file_common:
 load_file_done:
     // Display load start-end address
     // TODO to get start address of the load in non-relocatable mode, first two bytes need to be loaded first with open/read/read/close
-    lda #@KEY_SPACE
+    lda #KEY_SPACE
     jsr CHROUT
     lda #KEY_MINUS
     jsr CHROUT
-    lda #@KEY_DOLLAR
+    lda #KEY_DOLLAR
     jsr CHROUT
     stx TMP2
     sty TMP2+1      // save end address in TMP2/TMP2+1

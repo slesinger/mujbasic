@@ -2,6 +2,96 @@
 #import "constants.asm"
 
 
+petscii2screen:
+/*
+# Generate scrcode_from_petscii mapping
+scrcode_from_petscii = []
+for petscii in range(0, 256):
+    # Special handling for $FF (pi symbol)
+    if petscii == 0xff:
+        petscii = 0xde
+
+    # Conversion logic
+    if petscii < 0x20:
+        scrcode = petscii + 0x80  # Inverted control chars
+    elif petscii < 0x40:
+        scrcode = petscii
+    elif petscii < 0x60:
+        scrcode = petscii - 0x40
+    elif petscii < 0x80:
+        scrcode = petscii - 0x20
+    elif petscii < 0xa0:
+        scrcode = petscii + 0x40  # Inverted
+    elif petscii < 0xc0:
+        scrcode = petscii - 0x40
+    else:
+        scrcode = petscii - 0x80
+
+    scrcode_from_petscii.append(scrcode)
+*/
+    rts
+
+// Convert screen code in A to petscii
+// Input: A = screen code
+// Output: A = petscii code
+// Killed registers: None
+screen2petscii:
+/*
+# Generate petscii_from_scrcode mapping
+petscii_from_scrcode = []
+for scrcode in range(0, 256):
+    # Reverse conversion logic
+    if scrcode < 0x20:  // @A PQ
+        petscii = scrcode + 0x40
+    elif scrcode < 0x40: // <SPC>! 01
+        petscii = scrcode
+    elif scrcode < 0x60:  // -<tree> LO
+        petscii = scrcode + 0x20
+    elif scrcode < 0x80:  // <SPC>| <pig>
+        petscii = scrcode + 0x40
+
+    elif scrcode < 0xa0:
+        petscii = scrcode - 0x40? # Inverted
+    elif scrcode < 0xc0:
+        petscii = scrcode + 0x40?
+    else:
+        petscii = scrcode + 0x80?
+    petscii_from_scrcode.append(petscii)
+*/
+    // Special case: screen code $DE corresponds to PETSCII $FF (pi)
+    cmp #$DE
+    beq !to_ff+
+    and #$7F  // clear reversed bit
+    // scr 00..1F -> petscii = scr + 0x40
+    cmp #$20
+    bcc !add40+
+    // scr 20..3F -> petscii = scr
+    cmp #$40
+    bcc !same+
+    // scr 40..5F -> petscii = scr + 0x20
+    cmp #$60
+    bcc !add20+
+    // scr 60..7F -> petscii = scr + 0x40
+    cmp #$80
+    bcc !add40+
+    // scr 80..9F -> petscii = scr - 0x80
+    jmp !same+
+
+!add40:
+    clc
+    adc #$40
+    rts
+!add20:
+    clc
+    adc #$20
+    rts
+!same:
+    rts
+!to_ff:
+    lda #$FF
+    rts
+
+
 // print single hex nibble in A (0..15) as ASCII to screen via CHROUT
 print_nibble:
     cmp #10
@@ -247,7 +337,7 @@ DCHROK:
 ERROR:
     ldy #MSG3-MSGBAS    // display "?" to indicate error and go to new line
     jsr SNDMSG
-    jmp parse_done      // back to main loop
+    CommandDone()      // back to main loop
 
 // message table// last character has high bit set
 MSGBAS:
@@ -264,7 +354,7 @@ MSG_UNKNOWN_COMMAND:
 MSG_HELP:
     .text "AVAILABLE COMMANDS:"
     .byte KEY_RETURN
-    .text " HELP - DISplaY THIS HELP MESSAGE"
+    .text " HELP - DISPLAY THIS HELP MESSAGE"
     .byte KEY_RETURN
-    .text " R    - DISplaY CPU REGISTERS"
+    .text " R    - DISPLAY CPU REGISTERS"
     .byte KEY_RETURN, $80

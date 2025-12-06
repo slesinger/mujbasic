@@ -140,3 +140,9 @@ Created with KickAssembler for the Commodore 64
 
 /websites/theweb_dk_kickassembler_webhelp
 /mist64/c64ref
+
+# Error Parking Lot
+
+G 080D se chova divne, G $080D je OK
+
+BRK handler neni aktiovan, protoze se vse pak chova trochu divne.
