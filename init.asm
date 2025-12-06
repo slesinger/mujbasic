@@ -1,3 +1,4 @@
+#import "constants.asm"
 // ============================================================================
 // init.asm - System Initialization for HONDANI Shell
 // ============================================================================
@@ -21,6 +22,7 @@ InitSystem:
     jsr ClearScreen
     jsr InitInputBuffer
     jsr DetectREU
+    jsr clear_history  // TODO load history from REU/network
     jmp PrintWelcomeMessage     // Tail call optimization
 
 // ============================================================================
@@ -188,6 +190,25 @@ LoadTextPtr:
     stx $03
     rts
 
+// ============================================================================
+// Fill commandline_history_addr ($c000 - $c400) buffer with spaces
+// ============================================================================
+// Input: None
+// Output: None
+// ============================================================================
+clear_history:
+    lda #SCR_SPACE
+    ldx #$00
+    stx commandline_history_idx
+clear_history_loop:
+    sta commandline_history_addr + $0000,x
+    sta commandline_history_addr + $0100,x
+    sta commandline_history_addr + $0200,x
+    sta commandline_history_addr + $0300,x
+    dex
+    bne clear_history_loop
+    stx commandline_history_idx  // set 0
+    rts
 // ============================================================================
 // Print Welcome Message
 // ============================================================================

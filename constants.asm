@@ -81,9 +81,10 @@
 .const KEY_NULL = $00
 .const KEY_CTRL_J = $0A
 .const KEY_RETURN = $0D
+.const KEY_DOWN = $11
 .const KEY_HOME = $13
 .const KEY_DELETE = $14
-.const KEY_CURSOR_RIGHT = $1D
+.const KEY_RIGHT = $1D
 .const KEY_GREEN = $1E
 .const KEY_BLUE = $1F
 .const KEY_SPACE = $20
@@ -145,7 +146,8 @@
 .const KEY_X = $58
 .const KEY_Y = $59
 .const KEY_Z = $5a
-.const KEY_CURSOR_LEFT  = $9D
+.const KEY_UP = $91
+.const KEY_LEFT = $9D
 
 
 // Screen Codes

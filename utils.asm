@@ -29,6 +29,29 @@ for petscii in range(0, 256):
 
     scrcode_from_petscii.append(scrcode)
 */
+    // Special case: petscii $FF corresponds to screen code $DE (pi)
+    cmp #$FF
+    beq !to_de+
+    // petscii 00..1F -> scrcode = petscii + 0x80
+    cmp #$20
+    bcc !add80+
+    // petscii 20..3F -> scrcode = petscii
+    cmp #$40
+    bcc !same+
+    // petscii 40..5F -> scrcode = petscii - 0x40
+    cmp #$60
+    bcc !sub40+
+    // petscii 60..7F -> scrcode = petscii - 0x20
+    cmp #$80
+    bcc !sub20+
+    // petscii 80..9F -> scrcode = petscii + 0x40
+    cmp #$A0
+    bcc !add40+
+    // petscii A0..BF -> scrcode = petscii - 0x40
+    cmp #$C0
+    bcc !sub40+
+    // petscii C0..FF -> scrcode = petscii - 0x80
+    jmp !sub80+
     rts
 
 // Convert screen code in A to petscii
@@ -77,20 +100,38 @@ for scrcode in range(0, 256):
     // scr 80..9F -> petscii = scr - 0x80
     jmp !same+
 
+!add20:
+    clc
+    adc #$20
+    rts
 !add40:
     clc
     adc #$40
     rts
-!add20:
+!add80:
     clc
-    adc #$20
+    adc #$80
     rts
 !same:
     rts
 !to_ff:
     lda #$FF
     rts
-
+!to_de:
+    lda #$DE
+    rts
+!sub20:
+    sec
+    sbc #$20
+    rts
+!sub40:
+    sec
+    sbc #$40
+    rts
+!sub80:
+    sec
+    sbc #$80
+    rts
 
 // print single hex nibble in A (0..15) as ASCII to screen via CHROUT
 print_nibble:

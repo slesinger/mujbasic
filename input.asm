@@ -22,6 +22,14 @@ HandleInput:
     bne !+
     jmp HandleReturn
 !:
+    cmp #KEY_UP
+    bne !+
+    jmp HandleHistoryUp
+!:
+    cmp #KEY_DOWN
+    bne !+
+    jmp HandleHistoryDown
+!:
     jsr CHROUT
     rts
 
@@ -40,19 +48,7 @@ HandleReturn:
 !:
     // store updated index
     sty commandline_history_idx
-    tya
-    asl  // multiply by 2
-    // read low address byte of history entry from ROM $ECF0
-    tay
-    lda SCRLOADDR,y
-    sta ZP_INDIRECT_ADDR          // store low byte of history entry address
-    lda SCRHIADDR,y
-    and #$07  // keep only 3 bits $04xx-$07xx
-    sec       // Set carry for subtraction
-    sbc #$04  // Subtract 4 from A    
-    ora #>commandline_history_addr  // move to $c0xx
-    sta ZP_INDIRECT_ADDR+1        // store high byte of history entry address
-
+    jsr get_history_entry_address
     // copy input from screen current line to PARSER_INPUT_PTR, max 79 chars
     ldy #79
 CopyInputLoop:
@@ -97,5 +93,65 @@ CopyInputLoopEnd:
     sta PARSER_INPUT_PTR
     sta PARSER_INPUT_PTR+1
     sta CursorPos
-
     rts
+
+
+// ============================================================================
+// Handle Command History Up/Down
+// ============================================================================
+HandleHistoryDown:
+    ldy commandline_history_idx  // load current index
+    tya
+    iny  // forward history
+    cpy #COMMANDLINE_HISTORY_MAXLEN
+    bne !+
+    // wrap around
+    ldy #$00
+!:
+    jmp HandleHistoryUpDown
+HandleHistoryUp:
+    ldy commandline_history_idx  // load current index
+    tya
+    dey  // backward history
+    cpy #$ff
+    bne !+
+    // wrap around
+    ldy #(COMMANDLINE_HISTORY_MAXLEN - 1)
+!:
+HandleHistoryUpDown:
+    sty commandline_history_idx
+    tay
+    jsr get_history_entry_address
+    // copy input from history buffer to screen, max 80 chars
+    ldy #79
+CopyHistoryLoop:
+    lda (ZP_INDIRECT_ADDR),y   // read from history buffer
+    jsr petscii2screen
+    sta (PNT),y        // store to current screen input line
+    dey
+    cpy #$ff
+    bne CopyHistoryLoop
+    rts
+
+
+// ============================================================================
+// Get History Entry Address
+// Input: Y = history index
+// Output: ZP_INDIRECT_ADDR = address of history entry
+// ============================================================================
+get_history_entry_address:
+    tya
+    asl  // multiply by 2
+    // read low address byte of history entry from ROM $ECF0
+    tay
+    lda SCRLOADDR,y
+    sta ZP_INDIRECT_ADDR          // store low byte of history entry address
+    lda SCRHIADDR,y
+    and #$07  // keep only 3 bits $04xx-$07xx
+    sec       // Set carry for subtraction
+    sbc #$04  // Subtract 4 from A    
+    ora #>commandline_history_addr  // move to $c0xx
+    sta ZP_INDIRECT_ADDR+1        // store high byte of history entry address
+    rts
+
+
