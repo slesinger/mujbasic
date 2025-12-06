@@ -30,6 +30,11 @@
 .const YR = $0339
 .const SP = $033A
 .const parser_input_cursor = $033B // Current position in parser input string, only used when parsing
+.const directory_listing_addr = $c400  // Pointer to loaded directory listing in memory
+.const commandline_history_addr = $c000  // Pointer to command line history buffer in memory
+.const COMMANDLINE_HISTORY_MAXLEN = 12  // $0400 / 80chars input line length = 12 lines of history
+.const PARSER_MAX_INPUT_LEN = 79 // Maximum length of user input
+.const commandline_history_idx = commandline_history_addr + COMMANDLINE_HISTORY_MAXLEN * (PARSER_MAX_INPUT_LEN + 1) + 1 // Index of current history entry
 
 // 192 bytes cassete buffer $033C-$03FB
 .const InputLength  = $033C        // Current length of input (in RAM - safe area)
@@ -43,13 +48,15 @@
 
 // Read-only system constants
 .const PNT = $d1                   // Read-only $00D1-$00D2	PNT	Pointer to the Address of the Current Screen Line
-.const PNTR = $d3                  // Read-only $00D3	PNTR	Cursor Column on Current Line 0-79
+.const PNTR = $d3                  // Read-only $00D3	PNTR	Cursor Column on Current Line 0-PARSER_MAX_INPUT_LEN
+.const SCRHIADDR = $d9             // Read-only $00D9-$00F2		Pointer to the High Byte of the Current Screen Line Address, see $ECF0
 .const BKVEC = $0316               // BRK instruction vector (official name CBINV)
 
 
 
 // KERNAL routines
 .const CLRSCR  = $E544             // KERNAL clear screen routine
+.const SCRLOADDR = $ECF0  // table of low bytes of screen line addresses
 .const SETMSG  = $FF90             // set kernel message control flag
 .const SECOND  = $FF93             // set secondary address after LISTEN
 .const TKSA    = $FF96             // send secondary address after TALK
@@ -249,7 +256,6 @@
 
 // Parser
 .const PARSER_INPUT_PTR = $0200  // BASIC line input buffer start
-.const PARSER_MAX_INPUT_LEN = 79 // Maximum length of user input
 .const PARSER_WHITESPACE = $20 // ASCII space character used as whitespace in parser
 .const PARSER_END_OF_TABLE = $FF // Special marker indicating end of parser token table
 

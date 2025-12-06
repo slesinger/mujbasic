@@ -29,12 +29,37 @@ HandleInput:
 // Handle Enter Key
 // ============================================================================
 HandleReturn:
+    // Resolve next history buffer index based on current index
+    ldy commandline_history_idx  // load current index (0-COMMANDLINE_HISTORY_MAXLEN-1)
+    iny  // move to next index
+    // is == COMMANDLINE_HISTORY_MAXLEN?
+    cpy #COMMANDLINE_HISTORY_MAXLEN
+    bne !+
+    // wrap around
+    ldy #$00
+!:
+    // store updated index
+    sty commandline_history_idx
+    tya
+    asl  // multiply by 2
+    // read low address byte of history entry from ROM $ECF0
+    tay
+    lda SCRLOADDR,y
+    sta ZP_INDIRECT_ADDR          // store low byte of history entry address
+    lda SCRHIADDR,y
+    and #$07  // keep only 3 bits $04xx-$07xx
+    sec       // Set carry for subtraction
+    sbc #$04  // Subtract 4 from A    
+    ora #>commandline_history_addr  // move to $c0xx
+    sta ZP_INDIRECT_ADDR+1        // store high byte of history entry address
+
     // copy input from screen current line to PARSER_INPUT_PTR, max 79 chars
     ldy #79
 CopyInputLoop:
     lda (PNT),y        // read from current screen input line
     jsr screen2petscii
     sta PARSER_INPUT_PTR,y   // store to input buffer
+    sta (ZP_INDIRECT_ADDR),y   // store this input to command line history buffer
     dey
     cpy #$ff
     beq CopyInputLoopEnd

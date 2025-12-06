@@ -21,13 +21,13 @@ cmd_ll:
 
     // filename = $
     lda #KEY_DOLLAR
-    sta $c000  // will be overwritten but who cares
+    sta directory_listing_addr  // will be overwritten but who cares
     lda #$01  // length 1
     sta FNLEN
     lda #$00
     sta SAVX        // Clear SAVX to indicate no load address
     sta ZP_INDIRECT_ADDR  // file name shares the same memory location as loaded directory entries but it's ok
-    lda #$c0  // working memory $c000
+    lda #>directory_listing_addr  // working memory directory_listing_addr
     sta SAVY        // Clear SAVY to indicate no load address
     sta ZP_INDIRECT_ADDR + 1
     jsr load_file
