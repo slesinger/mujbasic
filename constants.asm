@@ -303,6 +303,9 @@
     sta screen_history_write_ptr+1
     sta screen_history_read_ptr
     sta screen_history_read_ptr+1
+
+    lda #$08
+    sta FA  // default device number
 }
 
 

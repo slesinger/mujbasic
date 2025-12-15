@@ -1,5 +1,6 @@
 #import "constants.asm"
 #import "cmd_empty.asm"
+#import "cmd_hash.asm"
 #import "cmd_g.asm"
 #import "cmd_help.asm"
 #import "cmd_l.asm"
@@ -21,6 +22,7 @@
 .byte $88, $88, $88, $88
 tbl:
 .byte KEY_NULL, <tbl_null, >tbl_null  // empty line
+.byte KEY_HASH, <tbl_hash, >tbl_hash
 .byte KEY_G, <tbl_g, >tbl_g
 .byte KEY_H, <tbl_h, >tbl_h
 .byte KEY_L, <tbl_l, >tbl_l
@@ -33,6 +35,25 @@ tbl:
 tbl_null:
 .byte KEY_NULL, <cmd_empty, >cmd_empty  // empty line
 
+
+// Top level #
+tbl_hash:
+.byte KEY_NULL, <cmd_hash, >cmd_hash
+.byte KEY_8, <tbl_hash_device, >tbl_hash_device
+.byte KEY_9, <tbl_hash_device, >tbl_hash_device
+.byte KEY_A, <tbl_hash_device, >tbl_hash_device  // device 10
+.byte KEY_B, <tbl_hash_device, >tbl_hash_device  // device 11
+.byte KEY_C, <tbl_hash_device, >tbl_hash_device  // CSDB.dk
+.byte KEY_F, <tbl_hash_device, >tbl_hash_device  // Ultimate 64 Flash
+.byte KEY_H, <tbl_hash_device, >tbl_hash_device  // Ultimate 64 Home
+.byte KEY_S, <tbl_hash_device, >tbl_hash_device  // SD2IEC
+.byte KEY_T, <tbl_hash_device, >tbl_hash_device  // Ultimate 64 Temp
+.byte KEY_AMPERSAND, <tbl_hash_device, >tbl_hash_device  // Hondani Cloud
+.byte PARSER_END_OF_TABLE
+
+tbl_hash_device:
+.byte KEY_NULL, <cmd_hash, >cmd_hash
+.byte PARSER_END_OF_TABLE
 
 // Top level G
 tbl_g:

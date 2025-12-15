@@ -335,7 +335,7 @@ load_file_non_reloc:
     ldy #$01  // command, secondary address 0 to use file load address
 load_file_common:
     lda #$01  // logical number, can have up to 5 opened at the same time
-    ldx #$08  // device number  // TODO take current device from global variable
+    ldx FA  // device number  // TODO take current device from global variable
     jsr SETLFS          // call KERNAL set logical file parameters
 
     lda FNLEN            // length of filename
@@ -369,7 +369,7 @@ load_file_done:
 
 save_file:
     lda #$01  // logical number, can have up to 5 opened at the same time
-    ldx #$08  // device number
+    ldx FA  // device number
     ldy #$01  // secondary address, command, use PRG address  (or .X , .Y LOAD ADDRESS IF SA=0 )
     jsr SETLFS          // call KERNAL set logical file parameters
 
