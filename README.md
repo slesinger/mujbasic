@@ -1,11 +1,26 @@
 # Hondani Shell - Custom BASIC ROM Replacement for Commodore 64
 
-A custom BASIC ROM replacement for the Commodore 64, written in 6502 assembly using KickAssembler. This project assumes running on Commodore Ultimate or Commodore 64 with Ultimate Cartridge for networking capabilities.
+This project replaces the standard Commodore 64 BASIC ROM ($A000-$BFFF) with custom code. When the C64 is switched on, this ROM gets executed instead of the built-in BASIC interpreter. The HDN Shell provides modern command line capabilities inspired by Linux shell commands, enhancing productivity on the C64.
 
-## Project Overview
+### Motivation
+ - C64 is great hardware. It received wonderful update with C64 Ultimate,
+ - C64 can be used as a serious computer even these days. <your favorite reason goes here>,
+ - Command line is very powerful, and yes, you can find some inspiration in Linux shell which is not so bad in the end :-),
+ - HDN Shell brings power of command line to C64,
+ - HDN Shell replaces BASIC ROM and hence
+ - all C64 memory remains free for your usage.
+ - BASIC is mostly only used for loading programs, hence you will not miss it much,
+ - Who wants to program in BASIC can plug in a cartridge with BASIC,
+ - See all the features HDN Shell brings to your C64.
 
-This project replaces the standard Commodore 64 BASIC ROM ($A000-$BFFF) with custom code. When the C64 is switched on, this ROM gets executed instead of the built-in BASIC interpreter.
-
+ ### Features
+ - Focus on productivity :-)
+ - Abbreviated commands (e.g., `L` for `LOAD`, `LL` for `Long Directory List`),
+ - Commands inspired by Linux shell commands (e.g., `LS`, `LL`, `RM`, `MV`, `CP`),
+ - Command line history (use UP/DOWN arrows to navigate),
+ - Scroll back the screen like page up/page down (use F1/F7 keys),
+ - Integrated monitor to inspect memory (e.g. `M`, `G`),
+ - More to come once Commodore will deliver my C64 Ultimate :-)
 ### Current Version: 0.1 (Minimal Test)
 
 Features:
@@ -106,7 +121,7 @@ You can set these in VS Code settings (JSON):
 - [x] v0.1: Minimal ROM with screen increment loop
 - [ ] v0.2: Add basic text output capability
 - [ ] v0.3: Implement simple command parser
-- [ ] v0.4: Add tokenizer for BASH commands, will be executed remotely in Cloud via C64 Ultimate networking
+- [ ] v0.4: Add tokenizer for BASH commands, will be executed remotely in HDN Cloud via C64 Ultimate networking
 - [ ] v1.0: Full interpreter replacement
 
 ## Technical Notes
@@ -131,6 +146,8 @@ This project is free to use and modify for educational and personal purposes.
 - [C64 Wiki](https://www.c64-wiki.com/)
 
 ## Author
+
+[Honza](https://csdb.dk/scener/?id=2588) of [Hondani](https://csdb.dk/group/?id=901)
 
 Created with KickAssembler for the Commodore 64
 
@@ -167,4 +184,3 @@ demo list, game list, latest releases
  csdb messages
 
  coding help codex - AI coding prgletu
- 
