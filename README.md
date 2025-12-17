@@ -1,4 +1,4 @@
-# MujBASIC - Custom BASIC ROM Replacement for Commodore 64
+# Hondani Shell - Custom BASIC ROM Replacement for Commodore 64
 
 A custom BASIC ROM replacement for the Commodore 64, written in 6502 assembly using KickAssembler. This project assumes running on Commodore Ultimate or Commodore 64 with Ultimate Cartridge for networking capabilities.
 
@@ -39,14 +39,14 @@ see parser directory
 
 ### Method 1: Using VS Code Tasks (Recommended)
 
-1. Open `mujbasic.asm` in VS Code
+1. Open `hdnsh.asm` in VS Code
 2. Press `Ctrl+Shift+B` (or `Cmd+Shift+B` on Mac) to build
 3. The output will be created in the `build/` directory
 
 ### Method 2: Command Line
 
 ```bash
-java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar mujbasic.asm -o build/mujbasic.bin
+java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar hdnsh.asm -o build/hdnsh.bin
 ```
 
 ## Running the ROM
@@ -56,7 +56,7 @@ java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar mujbasic.asm -o 
 To test the ROM replacement in VICE (x64sc recommended):
 
 ```bash
-x64sc -basic mujbasic.bin -reu -reusize 128
+x64sc -basic hdnsh.bin -reu -reusize 128
 ```
 
 Or use the "Build and Run in VICE" task from VS Code (requires VICE path configured in extension settings).
@@ -146,3 +146,25 @@ Created with KickAssembler for the Commodore 64
 G 080D se chova divne, G $080D je OK
 
 BRK handler neni aktiovan, protoze se vse pak chova trochu divne.
+
+# Ideas Parking Lot
+
+cursor - rotating line to indicate 
+
+hondani cloud - group chat
+
+vic konzoli jako screen
+
+AI chat
+
+AI by mela dokumentaci
+
+HDN cloud zlate stranky C64 sceny, group list, 
+demo list, game list, latest releases
+
+  "Who is Hondani" pres AI
+
+ csdb messages
+
+ coding help codex - AI coding prgletu
+ 

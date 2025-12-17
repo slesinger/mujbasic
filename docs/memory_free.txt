@@ -1,4 +1,4 @@
-# Memory used by MujBASIC
+# Memory used by Hondani Shell
 
 // see constants.asm for related used addresses
 

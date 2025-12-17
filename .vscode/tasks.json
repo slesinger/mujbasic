@@ -2,12 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build MujBASIC",
+            "label": "Build Hondani Shell",
             "type": "shell",
                     "command": "bash",
                     "args": [
                         "-c",
-                        "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/mujbasic/mujbasic.asm -o mujbasic.bin -vicesymbols && mv mujbasic.bin mujbasic.sym mujbasic.vs build/"
+                        "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/hdnsh/hdnsh.asm -o hdnsh.bin -vicesymbols && mv hdnsh.bin hdnsh.sym hdnsh.vs build/"
             ],
             "group": {
                 "kind": "build",
@@ -35,7 +35,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/mujbasic/mujbasic.asm -o mujbasic.bin -vicesymbols && mv mujbasic.bin mujbasic.sym mujbasic.vs build/ && x64sc -8 ../../sdcards/sidekick64/D64/hondani/meetro-side-a.d64 -basic build/mujbasic.bin -reu -reusize 2048"
+                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/hdnsh/hdnsh.asm -o hdnsh.bin -vicesymbols && mv hdnsh.bin hdnsh.sym hdnsh.vs build/ && x64sc -8 ../../sdcards/sidekick64/D64/hondani/meetro-side-a.d64 -basic build/hdnsh.bin -reu -reusize 2048"
             ],
             "group": "test",
             "problemMatcher": {
@@ -53,7 +53,7 @@
                 "reveal": "always",
                 "panel": "shared"
             },
-            "dependsOn": ["Build MujBASIC"]
+            "dependsOn": ["Build Hondani Shell"]
         },
         {
             "label": "Build and Run PRG in VICE",
@@ -61,7 +61,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/mujbasic/mujbasic.asm -o mujbasic.bin -vicesymbols && mv mujbasic.bin mujbasic.sym mujbasic.vs build/ && x64sc -8 ../../sdcards/sidekick64/D64/hondani/meetro-side-a.d64 -basic /usr/local/share/vice/C64/basic-901226-01.bin -reu -reusize 2048 build/mujbasic.bin"
+                "java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar /home/honza/projects/c64/projects/hdnsh/hdnsh.asm -o hdnsh.bin -vicesymbols && mv hdnsh.bin hdnsh.sym hdnsh.vs build/ && x64sc -8 ../../sdcards/sidekick64/D64/hondani/meetro-side-a.d64 -basic /usr/local/share/vice/C64/basic-901226-01.bin -reu -reusize 2048 build/hdnsh.bin"
             ],
             "group": "test",
             "problemMatcher": {
@@ -79,7 +79,7 @@
                 "reveal": "always",
                 "panel": "shared"
             },
-            "dependsOn": ["Build MujBASIC"]
+            "dependsOn": ["Build Hondani Shell"]
         },
         {
             "label": "Clean Build",

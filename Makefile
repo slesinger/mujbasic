@@ -1,8 +1,8 @@
-# Makefile for MujBASIC project
+# Makefile for Hondani Shell project
 
 KICKASS_JAR = /home/honza/projects/c64/pc-tools/kickass/KickAss.jar
-ASM_SRC = mujbasic.asm
-BIN_OUT = mujbasic.bin
+ASM_SRC = hdnsh.asm
+BIN_OUT = hdnsh.bin
 
 # Common VICE emulator options
 REU_OPTS = -reu -reusize 128

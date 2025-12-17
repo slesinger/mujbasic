@@ -58,7 +58,7 @@
 .const TBLX = $d6                  // Read-only $00D6	TBLX	Current Cursor Physical Line Number
 .const SCRHIADDR = $d9             // Read-only $00D9-$00F2		Pointer to the High Byte of the Current Screen Line Address, see $ECF0
 .const BKVEC = $0316               // BRK instruction vector (official name CBINV)
-
+.const BASIC_START = $0801         // Start of BASIC program area in memory
 
 
 // KERNAL routines
@@ -176,6 +176,7 @@
 .const KEY_CLEAR = $93
 .const KEY_INSERT = $94
 .const KEY_LEFT = $9D
+.const KEY_SHIFT_U = $75
 
 
 // Screen Codes

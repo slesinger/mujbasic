@@ -7,7 +7,7 @@
 // Version: 0.1.0
 // ============================================================================
 
-.file [name="mujbasic.bin", type="bin", segments="BasicROM"]
+.file [name="hdnsh.bin", type="bin", segments="BasicROM"]
 
 // BASIC ROM is located at $A000-$BFFF (8KB)
 .segmentdef BasicROM [start=$A000, min=$A000, max=$BFFF, fill]

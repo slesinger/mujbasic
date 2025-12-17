@@ -231,7 +231,7 @@ clear_terminal_history:
 // Prints banner with REU status and ready prompt
 // ============================================================================
 PrintWelcomeMessage:
-    // Print base text "Hondani Shell v0.1"
+    // Print base text "HDN Shell v0.1"
     lda #<WelcomeText
     ldx #>WelcomeText
     jsr LoadTextPtr
@@ -400,8 +400,8 @@ PrintDecimal:
 .encoding "petscii_mixed"
 
 WelcomeText:
-    // .text "Hondani Shell v0.1"
-    .text "hondani shell v0.1"
+    // .text "HDN SHELL V0.1"
+    .text "hdn shell v0.1"
     .byte $00
 
 REULabel:

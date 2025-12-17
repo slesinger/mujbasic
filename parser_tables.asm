@@ -8,6 +8,7 @@
 #import "cmd_lsll.asm"
 #import "cmd_m.asm"
 #import "cmd_r.asm"
+#import "cmd_run.asm"
 #import "cmd_unknown.asm"
 
 // Token Table for parser generalisation
@@ -57,6 +58,7 @@ tbl_hash_device:
 .byte KEY_NULL, <cmd_hash, >cmd_hash
 .byte PARSER_END_OF_TABLE
 
+
 // Top level C
 tbl_c:
 .byte KEY_NULL, <cmd_unknown, >cmd_unknown  // c without arguments
@@ -94,6 +96,7 @@ tbl_help:
 .byte KEY_NULL, <cmd_help, >cmd_help  // no args
 .byte PARSER_END_OF_TABLE
 
+
 // Top level L
 tbl_l:
 // .byte KEY_NULL, <cmd_l, >cmd_l
@@ -112,13 +115,30 @@ tbl_ls:
 .byte KEY_SPACE, <cmd_ls, >cmd_ls  // ls with arguments
 .byte PARSER_END_OF_TABLE
 
+
 // Top level M
 tbl_m:
 .byte KEY_NULL, <cmd_m, >cmd_m   // m without arguments
 .byte KEY_SPACE, <cmd_m, >cmd_m  // m with arguments
 .byte PARSER_END_OF_TABLE
 
+
 // Top level R
 tbl_r:
 .byte KEY_NULL, <cmd_r, >cmd_r  // r without arguments
+.byte KEY_U, <tbl_ru, >tbl_ru
+.byte KEY_SHIFT_U, <tbl_rU, >tbl_rU
+.byte PARSER_END_OF_TABLE
+
+tbl_ru:
+.byte KEY_NULL, <cmd_unknown, >cmd_unknown
+.byte KEY_N, <tbl_run, >tbl_run
+.byte PARSER_END_OF_TABLE
+
+tbl_rU:
+.byte KEY_NULL, <cmd_run, >cmd_run  // no args
+.byte PARSER_END_OF_TABLE
+
+tbl_run:
+.byte KEY_NULL, <cmd_run, >cmd_run  // no args
 .byte PARSER_END_OF_TABLE

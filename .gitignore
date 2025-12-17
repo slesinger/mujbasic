@@ -5,7 +5,7 @@ build/
 *.sym
 *.dbg
 .source.txt
-mujbasic.bin
+hdnsh.bin
 venv/
 msbasic/
 docs/ramdos.zip

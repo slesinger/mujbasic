@@ -35,28 +35,7 @@ cmd_g:
 !:
     ParsingInputsDone() // finish parsing input line
     // Address parsed successfully, JMP to it
-    lda SAVX            // load A from saved low byte
-    sta PCL             // set PC low byte
-    lda SAVY            // load A from saved high byte
-    sta PCH             // set PC high byte
-
-    ldx SP              // load stack pointer from memory
-    txs                 // save in SP register
-    // jsr COPY1P          // copy provided address to PC
-    sei                 // disable interrupts
-    lda PCH             // push PC high byte on stack
-    pha
-    lda PCL             // push PC low byte on stack
-    pha
-    lda SR              // push status byte on stack
-    pha
-    lda ACC             // load accumulator from memory
-    ldx XR              // load X from memory
-    ldy YR              // load Y from memory
-    inc $d021
-    rti                 // return from interrupt (pops PC and SR)
-
-    // CommandDone()  // jump to parser completion handler in parser.asm
+    jmp run_address
 
 // copy TMP0 to PC
 COPY1P:
