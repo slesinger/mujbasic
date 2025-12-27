@@ -71,7 +71,7 @@ class RequestDispatcher:
             logger.error(f"Error initializing handlers: {e}")
             self.handlers = []
 
-    def dispatch(self, petscii_text: bytes) -> bytes:
+    def dispatch(self, petscii_text: bytes, session_id: int = 0) -> bytes:
         """
         Dispatch request to appropriate handler
 
@@ -96,13 +96,24 @@ class RequestDispatcher:
 
             # Find appropriate handler
             for handler in self.handlers:
-                if handler.can_handle(utf8_text):
+                # Pass session_id to can_handle/handle if supported
+                can_handle = False
+                try:
+                    can_handle = handler.can_handle(utf8_text, session_id)
+                except TypeError:
+                    can_handle = handler.can_handle(utf8_text)
+                if can_handle:
                     logger.info(f"Using handler: {handler.__class__.__name__}")
-                    response_utf8 = handler.handle(utf8_text)
+                    try:
+                        response_utf8 = handler.handle(utf8_text, session_id)
+                    except TypeError:
+                        response_utf8 = handler.handle(utf8_text)
 
                     # Convert response back to PETSCII
-                    response_petscii = BaseHandler.utf8_to_petscii(response_utf8)
-                    return response_petscii + bytes([0x00])  # Add null terminator
+                    response_petscii = BaseHandler.utf8_to_petscii(
+                        response_utf8)
+                    # Add null terminator
+                    return response_petscii + bytes([0x00])
 
             # No handler found - return error
             error_msg = "Unknown command. Type 'help' for available commands."
@@ -204,7 +215,7 @@ class CommandHandler:
         )
 
     @staticmethod
-    def handle_text_input(data: bytes) -> bytes:
+    def handle_text_input(data: bytes, session_id: int = 0) -> bytes:
         """
         Handle text input command ($02)
 
@@ -217,8 +228,8 @@ class CommandHandler:
         # Get dispatcher instance
         dispatcher = CommandHandler.get_dispatcher()
 
-        # Dispatch the request to appropriate handler
-        response_data = dispatcher.dispatch(data)
+        # Dispatch the request to appropriate handler, passing session_id
+        response_data = dispatcher.dispatch(data, session_id)
 
         return CommandHandler.create_response(
             ResponseType.PETSCII_NULL_TERMINATED,
@@ -240,7 +251,7 @@ class CommandHandler:
         return MAGIC_BYTES + bytes([response_type]) + data
 
     @staticmethod
-    def process_command(packet: bytes) -> Optional[bytes]:
+    def process_command(packet: bytes, session_id: int = 0) -> Optional[bytes]:
         """
         Process a command packet and generate response
 
@@ -256,7 +267,7 @@ class CommandHandler:
             if cmd_id == CommandID.KEYPRESS:
                 return CommandHandler.handle_keypress(data)
             elif cmd_id == CommandID.TEXT_INPUT:
-                return CommandHandler.handle_text_input(data)
+                return CommandHandler.handle_text_input(data, session_id)
             else:
                 logger.warning(f"Unknown command ID: ${cmd_id:02X}")
                 return CommandHandler.create_response(

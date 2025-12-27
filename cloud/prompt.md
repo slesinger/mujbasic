@@ -109,36 +109,104 @@ Use MCP server like this:
 The CONTEXT7_API_KEY is expected to be set in environment variables.
 
 ## HelpHandler
+
 Create a HelpHandler class that will respond to help requests with a static PETSCII text response describing available commands.
 If the "help" request contains additional text, use that as a search query to find relevant help topics from a predefined set. Use LLM agent with the Context7 MCP server to find the most relevant help topic and return that. Have a string for help system prompt.
 
 ## PythonEvalHandler
+
 Create a PythonEvalHandler class that will evaluate python expressions sent from the C64. The class will accept PETSCII text input, convert to UTF-8, evaluate the expression using eval(), convert the result back to PETSCII and return.
 For security reasons, restrict the available built-in functions and variables that can be accessed during evaluation.
 
 ## CSDBHandler
+
 Create a CSDBHandler class that will process requests to csdb.dk database. The class will accept PETSCII text input, convert to UTF-8, send a request to csdb.dk API, get the response, convert back to PETSCII and return.
 Use the requests library to make HTTP requests to the csdb.dk API.
-### Web API documentation
+"forum". This will return an XML with all the rooms in the forum. If you add the parameter roomid=<roomid> you will get all the topics in the specific room. Finally you can add the parameter topicid=<topicid> and get all the posts in the given topic.
+
+### List of commands
+
+Here are list of curl commands to get data from csdb.dk.
+
+
+#### find -> find results
+
+To find for a string (e.g., "Hondani") on csdb.dk and get the HTML result, use:
+
+```sh
+curl 'https://csdb.dk/search/?seinsel=all&search=Hondani'
 ```
-The CSDb webservice allows you to fetch most of the information within the CSDb database. This can either be used for private use, or to make some of the information in CSDb available on other websites.
 
-The webservice returns the information in XML-format. So far the webservice is only in it's very early stage, so no real documentation for the format of the XML is present. Also there might be missing some information you might think should be there, or some information might not be presented in the best way. If you have any sugestions you are welcome to contact the CSDb admin. (Check the help-section of CSDb for contact-info).
+This fetches the search results page for the given query. You can then parse the resulting HTML to extract information.
 
-So far you can extract the basic information within CSDb. This is information on the Releases, Groups, Sceners (handles) and Events plus all their relations. (Note that some of the information might not be there yet due to the early stage of development)
+Lets add the "find" command. It will be a csdb command. syntax
+c: find <whatever text>
+It will make such a curl request to csdb
+https://csdb.dk/search/?seinsel=all&search=bill&Go.x=8&Go.y=9
 
+the output should be similar to this:
+~~~
+219   release matches:
+123   DownloadBill Bailey (C64 Music)
+3456  DownloadBill Bailey (C64 Music) by The Legionaire
+67    DownloadBill the Cat (C64 Graphics)
+89    DownloadBillard (C64 Crack) by EBST Software Ltd.
+53    DownloadBilliards (C64 Crack) by Gods (G)
+Show all 219 matching releases
 
-How to use the webservice:
-So far you can only request info on one of the four basic entry-types by their internal ID in CSDb. The ID can be seen in the URL when browsing CSDb.
-The way to call the webservice is:
-https://csdb.dk/webservice/?type=<type>&id=<id>&depth=<d>
+1 group match:
+573   The Billy Buckhead Crew (BBC) (United Kingdom)
 
-<type> is the entry-type you want info for. The possibilities are: "release", "group", "scener", "event", "bbs" and "sid".
-<id> is the internal ID of the entry you want info for.
-<d> is the depth you want info for. Default is 2, which will return more or less the same info which is displayed on the normal info-page for the particular entry.
+40 scener matches:
+Bill
+Bill
+Bill Best
+Bill Pamier
+Bill the Cat
+Show all 40 matching sceners
 
-The depth-value tells the webservice how deep it should makes it's recursive calls when finding information. F.x. if you want information on a group, the call to get the information on the group is considered the first recursive call. You can also get information on which releases this group have relased, which is the second recursive call. The third recursive call would be something like credits for each of the releases released by this group, etc.
-Because CSDb is so heavily cross-referenced, a call of depth 5 or 6 to almost any entry, will result in a VERY large output. Because of this the maximum depth alowed is 4.
+1 BBS match:
+765  Billionaire Boys Club (United States)
 
-You can also get information from the forum. The syntax for this is a bit different. First of all you need to set the type to "forum". This will return an XML with all the rooms in the forum. If you add the parameter roomid=<roomid> you will get all the topics in the specific room. Finally you can add the parameter topicid=<topicid> and get all the posts in the given topic.
-```
+111 SID matches:
+PlayBill by Jason Tyler (Neptune) (1993 The Second Ring)
+PlayBill & Ted by Benjamin Dibbert (Nordischsound) (2023 Pixelbrei)
+PlayBill Bailey by Paul Kleimeyer <?> (1983 Access Software Inc.)
+PlayBill Bailey by Alan Beggerow (1990 Loadstar)
+PlayBill Bass by JCH & Thomas Mogensen (DRAX) (1990 Vibrants)
+Show all 111 matching SIDs
+~~~
+
+There will be max 5 items per section displayed. All of the items will be preceded by id of the item. I assume each id will have at most 5 digits plus one space character, hence align the disaply text of the items to 6th column. But if the id has more digits it is ok to print it misaligned.(more towards rigth)
+The screen only has 40 columns, trim the lines to that width.
+
+Before you make any changes inspect the existing code to avoid any duplicated code.
+
+#### cd -> change directory
+The csdb module will behave a bit like a file system.
+##### Setting c: as default module
+If user inputs "c:" without any further command, this backend will remember it so that when the user will input "find bill" the c: will will be assumed. In other words it will be interpreted the same like if the user inputs "c: find bill".
+
+##### cd command
+When user inputs command "cd" it will virtually change to that directory. For example the user session will go like this:
+c:
+cd group
+find hondani
+This example will assume csdb as module (with c:), next it will assume to treat groups only (with cd group) and the find hondani command will only list all found matches for hondani groups only. E.g. releases, sceners, BBS,... will be ignored.
+
+###### cd into item detail
+User can use cd command to get from listing into item detail. Example user session:
+c:
+cd group
+find hondani
+cd 901
+This session will first find and list all groups matching Hondani. The actual Hondani group has id=901. When user used cd 901 it will show details of the Hondani group item. This is the like if the user will input: "c: group 901"
+
+Notes:
+1. add per-user session support. Use session id. The id will be a word (2bytes) integer. This id may be present in the requests later. If you do not get it in the request, simply assume $0000 which means it is a single session (single user).
+2. Only assume csdb module if the user switched to the module by saying "c:".
+3. Add support for pwd command that will be able to list the absolute path to the curren directory. Example pwd: c:/group/901 .
+
+#### latest releases
+#### latest forum posts
+

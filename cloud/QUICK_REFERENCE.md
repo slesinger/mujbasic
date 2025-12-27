@@ -7,7 +7,11 @@
 | `I: <question>` | Ask AI assistant | `I: what is peek and poke?` |
 | `help [topic]` | Get help | `help`, `help chat` |
 | `? <expression>` | Evaluate Python | `? 2 + 2`, `? hex(49152)` |
-| `c: <query>` | Query CSDB | `c: release 1234` |
+| `c:` | Enter CSDB navigation mode | `c:` |
+| `cd <type>` | Change CSDB directory (release, group, scener, event, bbs, sid) | `cd group` |
+| `find <text>` | Search in current CSDB directory (or all if none) | `find hondani` |
+| `cd <id>` | Enter detail for item in current directory | `cd 901` |
+| `pwd` | Show current CSDB path | `pwd` |
 
 ## Python Eval Functions
 
@@ -47,18 +51,46 @@
 ? hex(65535)   # Max address: $FFFF
 ```
 
-## CSDB Queries
+## CSDB Navigation & Queries
 
-Currently supports ID-based queries:
-
+### Entering CSDB mode
 ```
-c: release 12345  # Get release by ID
-c: group 678      # Get group by ID
-c: scener 999     # Get scener by ID
-c: event 42       # Get event by ID
+c:
+```
+This sets CSDB as the active module for your session. All subsequent commands will be interpreted as CSDB commands until you switch modules.
+
+### Navigation commands
+```
+cd <type>      # Change to a CSDB directory (group, release, scener, event, bbs, sid)
+find <text>    # Search for items in the current directory (or all types if none)
+cd <id>        # Enter detail for an item in the current directory (e.g. cd 901)
+pwd            # Show current CSDB path (e.g. c:/group/901)
 ```
 
-Find IDs by browsing https://csdb.dk
+### Direct queries
+```
+c: release <id>  # Get release info by ID
+c: group <id>    # Get group info by ID
+c: scener <id>   # Get scener info by ID
+c: event <id>    # Get event info by ID
+```
+
+### Example session
+```
+c:
+cd group
+find hondani
+cd 901
+pwd
+```
+This will:
+- Enter CSDB navigation mode
+- Change to the group directory
+- Find all groups matching "hondani"
+- Enter the group with ID 901
+- Show the current path as c:/group/901
+
+Each user/session has an independent CSDB navigation state (session id is a 2-byte integer, default 0 if not provided).
 
 ## Setup for Full Features
 
