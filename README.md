@@ -1,213 +1,100 @@
-# Hondani Shell - Custom BASIC ROM Replacement for Commodore 64
+# TODO
 
-You want to pronounce HDN Shell as "Hondani Shell".
+```
+Create Ultimage cfg file
+Verify installation steps
+How to set cloud IP address in HDN Shell???
+ngrok for testing cloud server from internet????
+```
 
-This project replaces the standard Commodore 64 BASIC ROM ($A000-$BFFF) with custom code. When the C64 is switched on, this ROM gets executed instead of the built-in BASIC interpreter. The HDN Shell provides modern command line capabilities inspired by Linux shell commands, enhancing productivity on the C64.
+# HDN Shell - BASIC ROM Replacement for Commodore 64
 
-### Motivation
- - C64 is great hardware. It received wonderful update with C64 Ultimate,
- - C64 can be used as a serious computer even these days. <your favorite reason goes here>,
- - Command line is very powerful, and yes, you can find some inspiration in Linux shell which is not so bad in the end :-),
- - HDN Shell brings power of command line to C64,
- - HDN Shell replaces BASIC ROM and hence
- - all C64 memory remains free for your usage.
+_You want to pronounce HDN Shell as "Hondani Shell"_.
+
+This project replaces the standard Commodore 64 BASIC ROM ($A000-$BFFF) with modern command line sporting new features. When the C64 is switched on, this ROM gets executed instead of the built-in BASIC interpreter. The HDN Shell provides modern command line capabilities inspired by Linux shell commands, enhancing productivity on the C64.
+
+## Benefits for C64 Users
+ 
+ - Simplifies frequently used commands (instead of `LOAD "*",8,1` you can just type `LS` or `DIR`),
+ - Speeds up file management tasks (switching drives `#9`, copying `cp from to`, ...),
+ - Use SD2IEC like device #14 (with Ultimate), including directories,
+ - Command line inspired by Linux,
+ - Command history,
+ - Screen scrollback capability\*,
+ - Integrated monitor for memory inspection,
+ - Connects to HDN Cloud for extended functionality\*\*,
+ - Fully open source, including cloud server code,
+ - HDN Cloud can be run on your PC fully transparent privacy,
+ - or use free public HDN Cloud server for easier setup,
+ - Searchable manual pages\*\*,
+ - AI chat\*\*,  
+ - Execute python expressions\*\*,
+ - All the above by keeping all the memory free for your programs.
+
+\* Requires REU  
+\*\* Requires C64 Ultimate or 1541 Ultimate cartridge with networking capabilities
+
+## Motivation
+ 
+ - C64 is a great hardware C64 Ultimate makes it even better,
+ - These days, C64 can be used as a serious computer for \<insert your favorite reason\>,
+ - Command line is powerful, that is a fact, HDN Shell brings power of command line to C64,
+ - Focus on productivity, not on nostalgia,
+ - HDN Shell replaces BASIC ROM and hence all C64 memory remains free for your usage,
  - BASIC is mostly only used for loading programs, hence you will not miss it much,
  - Who wants to program in BASIC can plug in a cartridge with BASIC,
+ - Mankind got impatient, HDN Shell uses fast methods for injecting programs into memory,
+ - Use cloud services with C64, network like a modern computer.
  - See all the features HDN Shell brings to your C64.
 
- ### Features
- - Focus on productivity :-)
- - Abbreviated commands (e.g., `L` for `LOAD`, `LL` for `Long Directory List`),
- - Commands inspired by Linux shell commands (e.g., `LS`, `LL`, `RM`, `MV`, `CP`),
- - Command line history (use UP/DOWN arrows to navigate),
- - Scroll back the screen like page up/page down (use F1/F7 keys),
- - Integrated monitor to inspect memory (e.g. `M`, `G`),
- - More to come once Commodore will deliver my C64 Ultimate :-)
-### Current Version: 0.1 (Minimal Test)
+ ## Future Features
 
-Features:
-- Initialize (detects REU size, clears screen)
-- Expects user input like a terminal
-- Dispatch user input (see Syntax section)
+ - Have multiple command line sessions (virtual consoles) and switch between them like in Linux (C=+1, C=+2, ...),
+ - Allow for copy/paste on the screen, (maybe between cloud and C64 also?), 
+ - Write your own program in the cloud and use it on the C64,
+ - prglets support - relocatable small residential programs
+ - SID/MOD background music playback,
+ - Provide a simple file editor (like [speedscript](https://github.com/gillham/speedscript)),
 
-### Future Plans
-- Implement a simple plain text editor https://github.com/gillham/speedscript
-- prglets support - relocatable small residential programs (relocation possible with hints in header and relative jumps
-- multiple screens / virtual consoles
-)
-### Syntax
+## How do I Install it?
 
-The syntax for user commands is as follows:
+The sweet spot is to use C64 Ultimate or 1541 Ultimate cartridge with networking capabilities. However, if you do no have one there are other options. See below.
 
-see parser directory
+In a nutshell, for full functionality you need to:
 
-## Prerequisites
+1. Set BASIC ROM in the Ultimate menu.
+2. Enable REU (recommended size 16MB) in the Ultimate menu.
+3. Connect your Ultimate to the network (Ethernet or WiFi).
 
-1. **KickAssembler** - Java-based 6502 assembler
-   - Download from: http://www.theweb.dk/KickAssembler/
-   - Install Java Runtime Environment (JRE) if not already installed
+### Using C64 Ultimate or 1541 Ultimate
 
-2. **VS Code Extension** - `Kick Assembler 8-Bit Retro Studio`
+#### BASIC ROM Replacement
 
-3. **VICE Emulator** (optional, for testing)
-   - Download from: https://vice-emu.sourceforge.io/
-   - Recommended for testing the ROM
+Download the latest `hdnsh.bin` from the [Releases](https://github.com/slesinger/hdnshell/releases) page.
 
-## Building the Project
+...
 
-### Method 1: Using VS Code Tasks (Recommended)
+### Alternative Options (without C64 Ultimate)
 
-1. Open `hdnsh.asm` in VS Code
-2. Press `Ctrl+Shift+B` (or `Cmd+Shift+B` on Mac) to build
-3. The output will be created in the `build/` directory
+...
 
-### Method 2: Command Line
+### How do I Verify it Works?
 
-```bash
-java -jar /home/honza/projects/c64/pc-tools/kickass/KickAss.jar hdnsh.asm -o build/hdnsh.bin
-```
+...
 
-## Running the ROM
+## User Manual
 
-### In VICE Emulator
+You can type ```HELP``` in the command line to get a list of available commands. You can also get help on particular topic with ```HELP <command>``` or ```HELP <whatever is difficult for you>```.
 
-To test the ROM replacement in VICE (x64sc recommended):
-
-```bash
-x64sc -basic hdnsh.bin -reu -reusize 128
-```
-
-Or use the "Build and Run in VICE" task from VS Code (requires VICE path configured in extension settings).
-
-### On Real Hardware
-
-1. Burn the ROM to an EPROM/EEPROM chip
-2. Create a cartridge PCB with the ROM at the BASIC ROM address space
-3. Insert cartridge and power on the C64
-
-**Note:** For cartridge format, you need to create a proper CRT file with cartridge header. The current build creates a raw binary suitable for cartridge use.
-
-## Memory Map
-
-- **$A000-$BFFF**: BASIC ROM space (8KB) - where our code lives
-- **$0400-$07E7**: Screen memory (1000 bytes)
-- **$D020**: Border color register
-- **$D021**: Background color register
-
-## Expected Behavior
-
-When the ROM is loaded:
-1. Screen is cleared with spaces
-2. Border color set to light blue ($0E)
-3. Background color set to blue ($06)
-4. The first character on screen (top-left corner) will rapidly cycle through different characters as $0400 is incremented
-
-## Configuration
-
-### KickAssembler Extension Settings
-
-Make sure to configure the extension with paths to:
-- KickAssembler JAR file: `kick-assembler-vscode-ext.KickAssembler.kickAssJarPath`
-- VICE emulator: `kick-assembler-vscode-ext.VICE.emulatorPath`
-
-You can set these in VS Code settings (JSON):
-
-```json
-{
-    "kick-assembler-vscode-ext.KickAssembler.kickAssJarPath": "/path/to/KickAss.jar",
-    "kick-assembler-vscode-ext.VICE.emulatorPath": "/path/to/x64sc"
-}
-```
-
-## Development Roadmap
-
-- [x] v0.1: Minimal ROM with screen increment loop
-- [ ] v0.2: Add basic text output capability
-- [ ] v0.3: Implement simple command parser
-- [ ] v0.4: Add tokenizer for BASH commands, will be executed remotely in HDN Cloud via C64 Ultimate networking
-- [ ] v1.0: Full interpreter replacement
-
-## Technical Notes
-
-### BASIC ROM Vectors
-
-The BASIC ROM must provide specific vectors at the end of the ROM space ($BF80-$BFFF) for the KERNAL to properly interface with it. The current minimal version includes placeholder vectors.
-
-### Cold Start
-
-The C64 KERNAL jumps to $A000 on cold start (power-on or reset with ROM replacement). Our code begins execution at this address.
+Or, read the [User Manual](docs/user_manual.md).
 
 ## License
 
 This project is free to use and modify for educational and personal purposes.
 
-## Resources
-
-- [C64 Memory Map](https://sta.c64.org/cbm64mem.html)
-- [KickAssembler Documentation](http://www.theweb.dk/KickAssembler/webhelp/content/topics/introduction.html)
-- [6502 Instruction Set](http://www.6502.org/tutorials/6502opcodes.html)
-- [C64 Wiki](https://www.c64-wiki.com/)
-
 ## Author
 
-[Honza](https://csdb.dk/scener/?id=2588) of [Hondani](https://csdb.dk/group/?id=901)
+[Honza](https://csdb.dk/scener/?id=2588) with support of the [Hondani](https://csdb.dk/group/?id=901) gang.
 
 Created with KickAssembler for the Commodore 64
 
-## Notes
-
-### HDN Cloud
-[See cloud/README.md for details](cloud/README.md)
-### Context7
-
-/websites/theweb_dk_kickassembler_webhelp
-/mist64/c64ref
-
-# Error Parking Lot
-
-G 080D se chova divne, G $080D je OK
-
-BRK handler neni aktiovan, protoze se vse pak chova trochu divne.
-
-# Ideas Parking Lot
-
-cursor - rotating line to indicate 
-
-hondani cloud - group chat with https://github.com/WiC64-Team/wic64-mex
-
-vic konzoli jako screen
-
-AI chat
-
-AI by mela dokumentaci
-  https://www.the-dreams.de/aay.html
-
-HDN cloud zlate stranky C64 sceny, group list, 
-demo list, game list, latest releases
-
-  "Who is Hondani" pres AI
-
- csdb messages
-
- coding help codex - AI coding prgletu
-
- ## High-level use cases
-
- - Play games/demos
- - Fetch them from csdb.dk
- - Search new releases in csdb.dk,...
- - Messaging via csdb.dk
- - Chat between C64 users
- - News accumulation from various sources (csdb.dk, lemon64.com, ...)
- - Use HDN Shell documentation (with AI)
- - Develop prglets for HDN Shell
- - Develop stuff on C64U
- - Use C64 reference documentation (with AI)
- - Do daily routine tasks on C64 (reading emails, browsing web,...)
- - Use HDN Cloud applications (chat, coding help, databases, conversation tools, memory analysis, ...)
- - General AI chatting
- - Use git
- - Image search/generation and conversion to C64 graphics
- - SID Music search and playback
- - Manage files on C64U SD card
- - Manage files on HDN Cloud, share files

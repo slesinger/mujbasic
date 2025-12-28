@@ -207,6 +207,39 @@ Notes:
 2. Only assume csdb module if the user switched to the module by saying "c:".
 3. Add support for pwd command that will be able to list the absolute path to the curren directory. Example pwd: c:/group/901 .
 
+##### Retrieving files
+There is a download option in the Release page. The release page output may look like this
+---
+Release: Meetro 2024
+Released by: 901 Hondani
+Release Date: 16 December 2024
+Type: C64 Demo
+User rating: 7.8/10 (8 votes)
+Files:
+305029 Meetro2024-Hondani.zip (191)'
+---
+###### 1. ZIP scenario
+Then the user can use "cd" in case the file is a zip. Example:
+cd 305029
+In this scenario this application will transparently download the zip to /tmp/<file id> folder and extract it there. Return list of extracted files.
+Also update the pwd path. If the user types "pwd" for the example above it has to show
+c:/release/248345/305029
+Where 248345 is id of the release. That means c:/release/248345 is current path and when changing directory to the 305029 file, it will append to the path.
+Zip files cannot be retrieved directly to the client because the client does not know how to work with them. That is why there has to be cd to the zip firts. Next the user will be able to retrieve one or more files from the zip like this
+cp <file name>
+###### 2. d64, d81 or other files than zip Scenario
+In this scenario user can retrieve the file (because it is not compressed) by using
+cp <file name>
+The <file name> can be exact filename or ending by * or just cp * (retrieve all)
+
+###### Retrieval process
+When users uses cp command, download the file or get it from the zip and place into /tmp/... 
+The print a log output: "File <file name> has been placed to <dir/filename>" There can be multiple log outputs, one for each file.
+
+Before you make any changes to code, analyze the existing code, do refactoring if need be and build on top of existing code. Avoid making redundant code. Use best coding practices. Structure code properly.
+Ask additianal question if any information is missing.
+
+https://csdb.dk/release/download.php?id=305029
 #### latest releases
 #### latest forum posts
 

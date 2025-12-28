@@ -89,6 +89,7 @@ class C64TestClient:
         # Receive response
         response = self.socket.recv(4096)
         self.print_response(response)
+        return self.decode_response(response)
 
     def send_text(self, text: str):
         """
@@ -113,6 +114,50 @@ class C64TestClient:
         # Receive response
         response = self.socket.recv(4096)
         self.print_response(response)
+        return self.decode_response(response)
+
+    def decode_response(self, response: bytes):
+        """
+        Decode response and return text
+
+        Args:
+            response: Response packet from server
+
+        Returns:
+            Decoded text string or None if decoding fails
+        """
+        if len(response) < 3:
+            return None
+
+        # Check magic bytes
+        magic = response[0:2]
+        if magic != MAGIC_BYTES:
+            return None
+
+        # Get response type
+        resp_type = response[2]
+        data = response[3:]
+
+        # Try to decode PETSCII to UTF-8
+        if resp_type == ResponseType.PETSCII_NULL_TERMINATED:
+            # Find null terminator
+            null_pos = data.find(0x00)
+            if null_pos != -1:
+                petscii_data = data[:null_pos]
+            else:
+                petscii_data = data
+
+            if len(petscii_data) > 0:
+                # Convert to ASCII/UTF-8
+                try:
+                    ascii_bytes = bytes([Petscii.petscii2ascii(b)
+                                        for b in petscii_data])
+                    text = ascii_bytes.decode('ascii')
+                    return text
+                except Exception:
+                    return None
+
+        return None
 
     def print_response(self, response: bytes):
         """

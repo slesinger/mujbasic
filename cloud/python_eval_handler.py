@@ -6,7 +6,7 @@ Processes requests starting with "?"
 """
 import logging
 import math
-from typing import Any, Dict
+from typing import Any
 from base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class PythonEvalHandler(BaseHandler):
         self.safe_namespace.update(SAFE_BUILTINS)
         self.safe_namespace.update(SAFE_MATH)
 
-    def can_handle(self, text: str) -> bool:
+    def can_handle(self, text: str, session_id: int = 0) -> bool:
         """
         Check if text starts with "?"
 
@@ -70,7 +70,7 @@ class PythonEvalHandler(BaseHandler):
         """
         return text.strip().startswith("?")
 
-    def handle(self, text: str) -> str:
+    def handle(self, text: str, session_id: int = 0) -> str:
         """
         Evaluate Python expression and return result
 

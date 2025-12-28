@@ -2,7 +2,6 @@
 Base handler class for request processing
 """
 from abc import ABC, abstractmethod
-from typing import Optional
 from generate_pet_asc_table import Petscii
 
 
@@ -10,12 +9,13 @@ class BaseHandler(ABC):
     """Base class for all request handlers"""
 
     @abstractmethod
-    def can_handle(self, text: str) -> bool:
+    def can_handle(self, text: str, session_id: int = 0) -> bool:
         """
         Check if this handler can process the given text
 
         Args:
             text: UTF-8 text to check
+            session_id: The session ID for the request
 
         Returns:
             True if this handler can process the text
@@ -23,12 +23,13 @@ class BaseHandler(ABC):
         pass
 
     @abstractmethod
-    def handle(self, text: str) -> str:
+    def handle(self, text: str, session_id: int = 0) -> str:
         """
         Process the request and return response
 
         Args:
             text: UTF-8 text to process
+            session_id: The session ID for the request
 
         Returns:
             UTF-8 response text

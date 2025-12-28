@@ -6,7 +6,6 @@ Processes requests starting with "help"
 """
 import os
 import logging
-from typing import Optional
 from base_handler import BaseHandler
 from dotenv import load_dotenv
 
@@ -118,7 +117,7 @@ class HelpHandler(BaseHandler):
         except Exception as e:
             logger.error(f"Error initializing help LLM: {e}")
 
-    def can_handle(self, text: str) -> bool:
+    def can_handle(self, text: str, session_id: int = 0) -> bool:
         """
         Check if text starts with "help"
 
@@ -130,7 +129,7 @@ class HelpHandler(BaseHandler):
         """
         return text.strip().lower().startswith("help")
 
-    def handle(self, text: str) -> str:
+    def handle(self, text: str, session_id: int = 0) -> str:
         """
         Process help request
 
@@ -184,7 +183,7 @@ class HelpHandler(BaseHandler):
 Available help topics:
 {topics_text}
 
-Find the most relevant help topic and return its content. If no exact match, provide a brief explanation of what '{topic}' might relate to in the context of this C64 cloud server."""
+Find the most relevant help topic and return its content. If no exact match, provide a brief explanation of what '{topic}' might relate to in the context of this C64 cloud server."""  # noqa
 
             messages = [
                 SystemMessage(content=HELP_SYSTEM_PROMPT),

@@ -4,6 +4,8 @@ pytest>=7.0.0
 requests>=2.31.0
 python-dotenv>=1.0.0
 
+bs4>=0.0.2
+
 # LLM dependencies (required for chat handler with Azure OpenAI)
 langchain>=1.0.0
 langchain-openai>=1.0.0

@@ -28,7 +28,8 @@ def parse_csdb_release_detail(html: str) -> Dict[str, Any]:
     # Released by
     b_released_by = main.find('b', string=lambda t: t and 'Released by' in t)
     if b_released_by:
-        next_a = b_released_by.find_next('a', href=lambda h: h and '/group/?id=' in h)
+        next_a = b_released_by.find_next(
+            'a', href=lambda h: h and '/group/?id=' in h)
         if next_a:
             group_name = next_a.get_text(strip=True)
             group_id_match = re.search(r'id=(\d+)', next_a['href'])
@@ -73,11 +74,18 @@ def parse_csdb_release_detail(html: str) -> Dict[str, Any]:
 
             file_info['name'] = a.get_text(strip=True).split('/')[-1]
 
+            # Downloads and size
             downloads_text = a.next_sibling
-            if downloads_text and 'downloads:' in downloads_text:
-                downloads_match = re.search(r'(\d+)', downloads_text)
+            if downloads_text:
+                downloads_match = re.search(
+                    r'downloads: (\d+)', downloads_text)
                 if downloads_match:
                     file_info['downloads'] = downloads_match.group(1)
+
+                size_match = re.search(r'size: (\d+)', downloads_text)
+                if size_match:
+                    file_info['size'] = int(size_match.group(1))
+
             files.append(file_info)
         result['files'] = files
 

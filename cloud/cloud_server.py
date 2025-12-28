@@ -8,6 +8,9 @@ Requires C64 Ultimate with network target on the client side.
 import socket
 import threading
 import logging
+import sys
+import os
+import argparse
 from typing import Tuple, Optional, List
 from generate_pet_asc_table import Petscii
 from base_handler import BaseHandler
@@ -15,6 +18,7 @@ from chat_handler import ChatHandler
 from help_handler import HelpHandler
 from python_eval_handler import PythonEvalHandler
 from csdb_handler import CSDBHandler
+from shared_state import get_session_state
 
 # Configure logging
 logging.basicConfig(
@@ -77,52 +81,47 @@ class RequestDispatcher:
 
         Args:
             petscii_text: PETSCII encoded text input (null-terminated)
+            session_id: The session ID for the request
 
         Returns:
             PETSCII encoded response
         """
         try:
             # Convert PETSCII to UTF-8
-            null_pos = petscii_text.find(0x00)
-            if null_pos != -1:
-                petscii_text = petscii_text[:null_pos]
-
-            if len(petscii_text) == 0:
-                return bytes([0x00])
-
-            # Convert to UTF-8
-            utf8_text = BaseHandler.petscii_to_utf8(petscii_text)
-            logger.info(f"Dispatching request: {utf8_text}")
+            utf8_text = BaseHandler.petscii_to_utf8(petscii_text.rstrip(b'\x00'))
+            logger.info(f"Session {session_id}: Received: '{utf8_text}'")
 
             # Find appropriate handler
             for handler in self.handlers:
-                # Pass session_id to can_handle/handle if supported
-                can_handle = False
-                try:
-                    can_handle = handler.can_handle(utf8_text, session_id)
-                except TypeError:
-                    can_handle = handler.can_handle(utf8_text)
-                if can_handle:
-                    logger.info(f"Using handler: {handler.__class__.__name__}")
-                    try:
-                        response_utf8 = handler.handle(utf8_text, session_id)
-                    except TypeError:
-                        response_utf8 = handler.handle(utf8_text)
-
+                if handler.can_handle(utf8_text, session_id):
+                    logger.info(
+                        f"Dispatching to {handler.__class__.__name__}")
+                    response_text = handler.handle(utf8_text, session_id)
+                    logger.info(f"Response: '{response_text[:100]}...'")
                     # Convert response back to PETSCII
-                    response_petscii = BaseHandler.utf8_to_petscii(
-                        response_utf8)
-                    # Add null terminator
-                    return response_petscii + bytes([0x00])
+                    return BaseHandler.utf8_to_petscii(response_text)
 
-            # No handler found - return error
-            error_msg = "Unknown command. Type 'help' for available commands."
-            return BaseHandler.utf8_to_petscii(error_msg) + bytes([0x00])
+            # If no handler claims it, but a module is active, send it to that module's handler
+            state = get_session_state(session_id)
+            active_module = state.get('active_module')
+            if active_module:
+                for handler in self.handlers:
+                    # A bit of a hack to see which handler corresponds to the module
+                    if (active_module == 'c' and isinstance(handler, CSDBHandler)) or \
+                       (active_module == 'i' and isinstance(handler, ChatHandler)):
+                        logger.info(
+                            f"Dispatching to active module handler {handler.__class__.__name__}")
+                        response_text = handler.handle(utf8_text, session_id)
+                        logger.info(f"Response: '{response_text[:100]}...'")
+                        return BaseHandler.utf8_to_petscii(response_text)
+
+            # Default response if no handler is found
+            logger.warning("No handler found for the request.")
+            return BaseHandler.utf8_to_petscii("Unknown command. Type 'help' for assistance.")
 
         except Exception as e:
-            logger.error(f"Error dispatching request: {e}")
-            error_msg = f"Error: {str(e)}"
-            return BaseHandler.utf8_to_petscii(error_msg) + bytes([0x00])
+            logger.error(f"Error during dispatch: {e}", exc_info=True)
+            return BaseHandler.utf8_to_petscii(f"Server error: {str(e)}")
 
 
 class CommandHandler:
@@ -217,24 +216,10 @@ class CommandHandler:
     @staticmethod
     def handle_text_input(data: bytes, session_id: int = 0) -> bytes:
         """
-        Handle text input command ($02)
-
-        Args:
-            data: Command data (null-terminated PETSCII string)
-
-        Returns:
-            Response packet
+        Handle text input by dispatching to appropriate handler
         """
-        # Get dispatcher instance
         dispatcher = CommandHandler.get_dispatcher()
-
-        # Dispatch the request to appropriate handler, passing session_id
-        response_data = dispatcher.dispatch(data, session_id)
-
-        return CommandHandler.create_response(
-            ResponseType.PETSCII_NULL_TERMINATED,
-            response_data
-        )
+        return dispatcher.dispatch(data, session_id)
 
     @staticmethod
     def create_response(response_type: int, data: bytes) -> bytes:
@@ -248,35 +233,41 @@ class CommandHandler:
         Returns:
             Complete response packet with magic bytes and type
         """
+        # Null-terminate only if PETSCII_NULL_TERMINATED
+        if response_type == ResponseType.PETSCII_NULL_TERMINATED:
+            if not data or data[-1] != 0x00:
+                data += bytes([0x00])
         return MAGIC_BYTES + bytes([response_type]) + data
 
     @staticmethod
     def process_command(packet: bytes, session_id: int = 0) -> Optional[bytes]:
         """
-        Process a command packet and generate response
-
-        Args:
-            packet: Raw command packet
-
-        Returns:
-            Response packet or None if invalid
+        Process a complete command packet from the client
         """
         try:
             magic, cmd_id, data = CommandHandler.parse_packet(packet)
+            if magic != MAGIC_BYTES:
+                logger.warning("Invalid magic bytes received")
+                return None
+
+            response_data = b''
+            response_type = ResponseType.PETSCII_NULL_TERMINATED
 
             if cmd_id == CommandID.KEYPRESS:
-                return CommandHandler.handle_keypress(data)
+                response_data = CommandHandler.handle_keypress(data)
             elif cmd_id == CommandID.TEXT_INPUT:
-                return CommandHandler.handle_text_input(data, session_id)
-            else:
-                logger.warning(f"Unknown command ID: ${cmd_id:02X}")
-                return CommandHandler.create_response(
-                    ResponseType.PETSCII_NULL_TERMINATED,
-                    b"unknown cmd\r\x00"
-                )
+                response_data = CommandHandler.handle_text_input(
+                    data, session_id)
+
+            if response_data:
+                return CommandHandler.create_response(response_type, response_data)
+
+        except ValueError as e:
+            logger.error(f"Packet parsing error: {e}")
         except Exception as e:
-            logger.error(f"Error processing command: {e}")
-            return None
+            logger.error(f"Error processing command: {e}", exc_info=True)
+
+        return None
 
 
 class C64Server:
@@ -315,57 +306,47 @@ class C64Server:
 
         try:
             while self.running:
-                self.server_socket.settimeout(1.0)
                 try:
                     client_socket, address = self.server_socket.accept()
-                    logger.info(f"Client connected from {address}")
-
-                    # Handle client in a separate thread
-                    client_thread = threading.Thread(
-                        target=self.handle_client,
-                        args=(client_socket, address),
-                        daemon=True
-                    )
-                    client_thread.start()
-
                     with self.lock:
                         self.clients.append(client_socket)
-                except socket.timeout:
-                    continue
-                except Exception as e:
-                    if self.running:
-                        logger.error(f"Error accepting connection: {e}")
+                    logger.info(f"Accepted connection from {address}")
+                    # Use a unique session ID for each client connection
+                    session_id = id(client_socket)
+                    thread = threading.Thread(
+                        target=self.handle_client, args=(client_socket, address, session_id))
+                    thread.daemon = True
+                    thread.start()
+                except OSError:
+                    # This can happen when the socket is closed by another thread
+                    break
         finally:
-            self.cleanup()
+            self.stop()
 
-    def handle_client(self, client_socket: socket.socket, address: Tuple[str, int]):
+    def handle_client(self, client_socket: socket.socket, address: Tuple[str, int], session_id: int):
         """
         Handle communication with a connected client
 
         Args:
             client_socket: Client socket
             address: Client address tuple
+            session_id: A unique ID for this client session
         """
         try:
             while self.running:
-                # Receive data
-                data = client_socket.recv(4096)
+                data = client_socket.recv(1024)
                 if not data:
-                    logger.info(f"Client {address} disconnected")
-                    break
-
-                logger.debug(
-                    f"Received {len(data)} bytes from {address}: {data.hex()}")
-
-                # Process command and send response
-                response = CommandHandler.process_command(data)
+                    break  # Connection closed
+                response = CommandHandler.process_command(data, session_id)
                 if response:
-                    client_socket.send(response)
-                    logger.debug(
-                        f"Sent {len(response)} bytes to {address}: {response.hex()}")
+                    client_socket.sendall(response)
+        except ConnectionResetError:
+            logger.info(f"Connection reset by {address}")
         except Exception as e:
-            logger.error(f"Error handling client {address}: {e}")
+            logger.error(
+                f"Error handling client {address}: {e}", exc_info=True)
         finally:
+            logger.info(f"Connection from {address} closed")
             with self.lock:
                 if client_socket in self.clients:
                     self.clients.remove(client_socket)
@@ -375,24 +356,21 @@ class C64Server:
         """Stop the server and close all connections"""
         logger.info("Stopping server...")
         self.running = False
+        if self.server_socket:
+            # This will unblock the accept() call
+            self.server_socket.close()
+            self.server_socket = None
 
-        # Close all client connections
         with self.lock:
             for client in self.clients:
                 try:
+                    client.shutdown(socket.SHUT_RDWR)
                     client.close()
-                except Exception as e:
-                    logger.error(f"Error closing client socket: {e}")
-                    pass
+                except OSError:
+                    pass  # Ignore errors on already closed sockets
             self.clients.clear()
 
-        # Close server socket
-        if self.server_socket:
-            try:
-                self.server_socket.close()
-            except Exception as e:
-                logger.error(f"Error closing server socket: {e}")
-                pass
+        logger.info("C64 Server stopped.")
 
     def cleanup(self):
         """Cleanup resources"""
@@ -401,7 +379,8 @@ class C64Server:
 
 def main():
     """Main entry point"""
-    import argparse
+    # Ensure cloud directory is in path
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
     parser = argparse.ArgumentParser(description='C64 HDN Cloud Server')
     parser.add_argument('--host', default='0.0.0.0',
@@ -421,9 +400,10 @@ def main():
     try:
         server.start()
     except KeyboardInterrupt:
-        logger.info("Received interrupt signal")
+        logger.info("Shutting down server...")
     finally:
         server.stop()
+        server.cleanup()
 
 
 if __name__ == '__main__':

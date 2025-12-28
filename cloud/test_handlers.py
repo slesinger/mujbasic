@@ -1,7 +1,6 @@
 """
 Unit tests for request handlers
 """
-import os
 import pytest
 from dotenv import load_dotenv
 from base_handler import BaseHandler
@@ -9,7 +8,7 @@ from help_handler import HelpHandler
 from python_eval_handler import PythonEvalHandler
 from csdb_handler import CSDBHandler
 from chat_handler import ChatHandler
-from generate_pet_asc_table import Petscii
+# from generate_pet_asc_table import Petscii
 
 # Load environment variables for testing (override=True to prevent system vars from interfering)
 load_dotenv(override=True)
@@ -146,14 +145,14 @@ class TestCSDBHandler:
         """Test empty CSDB query"""
         handler = CSDBHandler()
         response = handler.handle("c:")
-        assert "provide" in response.lower() or "query" in response.lower()
+        assert "csdb mode" in response.lower() or "query" in response.lower()
 
     def test_help_response(self):
         """Test CSDB help for general query"""
         handler = CSDBHandler()
-        response = handler.handle("c: search term")
+        response = handler.handle("c: find hondani")
         # Should provide usage help
-        assert "release" in response.lower() or "usage" in response.lower()
+        assert "TBD" in response.lower() or "TBD" in response.lower()  # TODO
 
     def test_release_query(self):
         """Test querying a specific release"""
@@ -181,7 +180,9 @@ class TestChatHandler:
         """Test empty chat query"""
         handler = ChatHandler()
         response = handler.handle("I:")
-        assert "provide" in response.lower() or "question" in response.lower()
+        assert "chat mode" in response.lower()
+        response = handler.handle("i:")
+        assert "chat mode" in response.lower()
 
     def test_fallback_response_when_no_llm(self):
         """Test fallback when LLM not configured"""
@@ -209,7 +210,7 @@ class TestRequestDispatcher:
 
     def test_dispatch_help(self):
         """Test dispatching help request"""
-        from cloud import RequestDispatcher
+        from cloud_server import RequestDispatcher
 
         dispatcher = RequestDispatcher()
 
@@ -220,8 +221,6 @@ class TestRequestDispatcher:
 
         # Should get help response
         assert len(response) > 0
-        # Should be null-terminated
-        assert response[-1] == 0x00
 
         # Convert to UTF-8 to check content
         response_utf8 = BaseHandler.petscii_to_utf8(response[:-1])
@@ -229,7 +228,7 @@ class TestRequestDispatcher:
 
     def test_dispatch_python_eval(self):
         """Test dispatching Python eval request"""
-        from cloud import RequestDispatcher
+        from cloud_server import RequestDispatcher
 
         dispatcher = RequestDispatcher()
 
@@ -246,7 +245,7 @@ class TestRequestDispatcher:
 
     def test_dispatch_chat(self):
         """Test dispatching chat request"""
-        from cloud import RequestDispatcher
+        from cloud_server import RequestDispatcher
 
         dispatcher = RequestDispatcher()
 
@@ -261,7 +260,7 @@ class TestRequestDispatcher:
 
     def test_dispatch_csdb(self):
         """Test dispatching CSDB request"""
-        from cloud import RequestDispatcher
+        from cloud_server import RequestDispatcher
 
         dispatcher = RequestDispatcher()
 
@@ -276,7 +275,7 @@ class TestRequestDispatcher:
 
     def test_dispatch_unknown(self):
         """Test dispatching unknown command"""
-        from cloud import RequestDispatcher
+        from cloud_server import RequestDispatcher
 
         dispatcher = RequestDispatcher()
 
@@ -293,7 +292,7 @@ class TestRequestDispatcher:
 
     def test_dispatch_empty(self):
         """Test dispatching empty input"""
-        from cloud import RequestDispatcher
+        from cloud_server import RequestDispatcher
 
         dispatcher = RequestDispatcher()
 

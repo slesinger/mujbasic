@@ -21,6 +21,8 @@ This application receives TCP data as commands from a C64 computer and responds 
 
 ## Installation
 
+Build and tested with Python 3.11.
+
 Install dependencies:
 
 ```bash

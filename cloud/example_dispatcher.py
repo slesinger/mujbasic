@@ -5,7 +5,7 @@ Simple example demonstrating the request dispatcher
 This script shows how to use the dispatcher without running the full server.
 Useful for testing and understanding the request routing.
 """
-from cloud import RequestDispatcher
+from cloud_server import RequestDispatcher
 from base_handler import BaseHandler
 
 

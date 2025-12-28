@@ -6,9 +6,9 @@ Processes requests starting with "I:"
 """
 import os
 import logging
-from typing import Optional
 from base_handler import BaseHandler
 from dotenv import load_dotenv
+from shared_state import get_session_state
 
 # Load environment variables (override=True to prevent system vars from interfering)
 load_dotenv(override=True)
@@ -101,33 +101,55 @@ class ChatHandler(BaseHandler):
         except Exception as e:
             logger.error(f"Error initializing tools: {e}")
 
-    def can_handle(self, text: str) -> bool:
+    def can_handle(self, text: str, session_id: int = 0) -> bool:
         """
-        Check if text starts with "I:"
+        Check if text starts with "I:" or if chat is the active module.
 
         Args:
             text: UTF-8 text to check
+            session_id: The session ID for the request
 
         Returns:
-            True if text starts with "I:" (case-insensitive)
+            True if this handler can process the text
         """
-        return text.strip().lower().startswith("i:")
+        t = text.strip().lower()
+        state = get_session_state(session_id)
+        if t.startswith("i:"):
+            return True
+        if state.get('active_module') == 'i':
+            if any(t.startswith(p) for p in ["c:", "?", "help"]):
+                return False
+            return True
+        return False
 
-    def handle(self, text: str) -> str:
+    def handle(self, text: str, session_id: int = 0) -> str:
         """
         Process chat request using LLM
 
         Args:
             text: UTF-8 text (should start with "I:")
+            session_id: The session ID for the request
 
         Returns:
             UTF-8 response text
         """
-        # Remove "I:" prefix
-        query = text.strip()[2:].strip()
+        t = text.strip()
+        t_lower = t.lower()
+        state = get_session_state(session_id)
+
+        if t_lower.startswith("i:"):
+            query = t[2:].strip()
+            if not query:
+                state['active_module'] = 'i'
+                return "Chat mode. I'm listening."
+        elif state.get('active_module') == 'i':
+            query = t
+        else:
+            # This should not be reached if can_handle is correct
+            return self._fallback_response("Internal error: handle called unexpectedly.")
 
         if not query:
-            return "Please provide a question or statement after 'I:'"
+            return "Please provide a question or statement."
 
         logger.info(f"Chat query: {query}")
 
