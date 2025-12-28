@@ -12,7 +12,7 @@ FS11_OPTS = -iecdevice11 -device11 1 -fs11 data/
 VICE_OPTS = $(REU_OPTS) $(DISK_OPTS) $(FS11_OPTS)
 # $(FS11_OPTS)
 
-.PHONY: all build run run-std clean
+.PHONY: all build run run-std clean cloud-server test-cloud cloud-client
 
 all: build
 
@@ -30,3 +30,17 @@ run-std:
 clean:
 	rm -f $(BIN_OUT) *.dbg *.sym *.vs *.prg
 
+cloud-server:
+	make -C cloud cloud-server
+
+cloud-client:
+	make -C cloud cloud-client
+
+
+# Tests
+
+test-cloud:
+	make -C cloud test-cloud
+
+test-client:
+	make -C cloud test-client

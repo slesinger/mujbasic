@@ -24,14 +24,14 @@ This project replaces the standard Commodore 64 BASIC ROM ($A000-$BFFF) with mod
  - Integrated monitor for memory inspection,
  - Connects to HDN Cloud for extended functionality\*\*,
  - Fully open source, including cloud server code,
- - HDN Cloud can be run on your PC fully transparent privacy,
+ - HDN Cloud can be run on your PC for fully transparent privacy,
  - or use free public HDN Cloud server for easier setup,
  - Searchable manual pages\*\*,
  - AI chat\*\*,  
  - Execute python expressions\*\*,
  - All the above by keeping all the memory free for your programs.
 
-\* Requires REU  
+\* Requires at least REU  
 \*\* Requires C64 Ultimate or 1541 Ultimate cartridge with networking capabilities
 
 ## Motivation
@@ -55,6 +55,7 @@ This project replaces the standard Commodore 64 BASIC ROM ($A000-$BFFF) with mod
  - prglets support - relocatable small residential programs
  - SID/MOD background music playback,
  - Provide a simple file editor (like [speedscript](https://github.com/gillham/speedscript)),
+ - Replace Ultimate web app by more integrated and powerful cloud solution,
 
 ## How do I Install it?
 
